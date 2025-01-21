@@ -5,11 +5,12 @@
 #include "mesh.h"
 #include "ql_assert.h"
 #include "renderer.h"
+#include "shared_unif_locations.h"
 #include "slmdlloader.h"
 #include "stats.h"
 #include "transform.h"
-#include <string>
 #include <concepts>
+#include <string>
 
 namespace ql {
 	namespace {
@@ -17,15 +18,16 @@ namespace ql {
 			RendererType type; // useless but is used for parent class so still necessary to include
 			unsigned int layer;
 			char data;
-		   // mesh name
-		   // material file
+			// mesh file
+			// shader file
+			// material file
 		};
 	} // namespace
 
-	MeshRenderer::MeshRenderer(GameObject &obj, const void *data): parent(&obj) { // parent will never be null
+	MeshRenderer::MeshRenderer(GameObject &obj, const void *data) : parent(&obj) { // parent will never be null
 		ASSERT(data != nullptr, "Mesh parameter was null");
-		meshrenderer_args& args = *(meshrenderer_args*)data;
-		std::string meshpath = &args.data;
+		meshrenderer_args &args = *(meshrenderer_args *)data;
+		std::string meshpath	= &args.data;
 		ASSERT(meshpath.size() > 0, "Model path is empty");
 		Console::log("Mesh path: %s", meshpath.c_str());
 		std::string matpath = &args.data + meshpath.size() + 1;
@@ -49,9 +51,15 @@ namespace ql {
 		// always will have a transform
 		// safe since pointer isn't stored
 		C3D_Mtx model = *parent->getComponent<transform>();
-		Mtx_Multiply(&model, &view, &model);
-
-		mat->setMaterial(&model, &projection);
+		C3D_Mtx out;
+		Mtx_Multiply(&out, &model, &view);
+		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_m_loc, &model);
+		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_mv_loc, &out);
+		Mtx_Multiply(&out, &out, &projection);
+		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_mvp_loc, &out);
+		
+		// set shader values
+		mat->setMaterial();
 
 		// LOD system
 		float distance2 = model.r[0].w * model.r[0].w +
@@ -75,7 +83,7 @@ namespace ql {
 		return *this;
 	}
 
-	MeshRenderer::MeshRenderer(MeshRenderer &&other): meshdata(std::move(other.meshdata)), mat(std::move(other.mat)), parent(other.parent) {
+	MeshRenderer::MeshRenderer(MeshRenderer &&other) : meshdata(std::move(other.meshdata)), mat(std::move(other.mat)), parent(other.parent) {
 		other.parent = nullptr;
 	}
 

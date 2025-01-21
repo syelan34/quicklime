@@ -1,7 +1,12 @@
 #include "scene.h"
 #include "audiosource.h"
+#include "c3d/maths.h"
 #include "camera.h"
 #include "console.h"
+#include <citro3d.h>
+#include "ql_time.h"
+#include "shared_unif_locations.h"
+#include <cmath>
 
 namespace ql {
 	Scene::Scene(std::string name) : _name(name), name(_name) {
@@ -50,6 +55,7 @@ namespace ql {
 
 	void Scene::draw() {
 		LightLock_Lock(&lock);
+		C3D_FVUnifSet(GPU_VERTEX_SHADER, shared_unifs::time_loc, FVec4_New(Time::curTime, std::sin(Time::curTime), std::cos(Time::curTime), Time::deltaTime));
 		reg.view<Camera>().each([](auto &cam) { cam.Render(); });
 		LightLock_Unlock(&lock);
 	};

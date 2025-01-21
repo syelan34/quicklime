@@ -26,9 +26,7 @@ namespace ql {
 		}
 	}
 
-	void Renderer::render(C3D_Mtx &view, C3D_Mtx &projection, u32 cullmask) {
-		if (!(layer & cullmask))
-			return;
+	void Renderer::render(C3D_Mtx &view, C3D_Mtx &projection) {
 		std::visit([&](auto &renderer) { renderer.render(view, projection); }, rnd); // call render on whatever renderer is here
 	}
 

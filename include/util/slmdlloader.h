@@ -11,10 +11,11 @@ namespace ql {
 	class GameObject;
 	namespace mdlLoader {
 		struct mdl_header {
-			unsigned int numVerts = 0;
-			unsigned char sv	  = 0;
+			char mdl[4]			  = "";
+			unsigned int numVerts = 0, sv = 0;
 			float radius		  = 0.f;
-			unsigned char attrnum, attrtypes[16], attrlen[16];
+			unsigned int attrnum;
+			unsigned char attrtypes[16], attrlen[16];
 		};
 
 		/**

@@ -71,28 +71,16 @@ namespace ql::mdlLoader {
 			if (!f)
 				goto exit_0;
 
-			char str[4] = "";
-			fread(str, sizeof(char), 3, f);
-			Console::log(str);
-			ASSERT(strcmp(str, "mdl"), "Error loading model");
-			if (!strcmp(str, "mdl"))
-				goto exit_1;
-
 			// read header info
 
 			mdl_header mdlheader;
 
-			// read basic info
+			// read header
 			fread(&mdlheader, sizeof(mdl_header), 1, f);
-
-			// read obj section
-			fread(str, sizeof(char), 3, f);
-			ASSERT(strcmp(str, "obj"), "Error loading model");
-			if (!strcmp(str, "obj"))
+			// check magic word
+			ASSERT(strncmp(&mdlheader.mdl, "QMDL", 4) == 0, "Error loading model");
+			if (strncmp(&mdlheader.mdl, "QMDL", 4))
 				goto exit_1;
-
-			// read bones
-			[[maybe_unused]] bone *bones = parseBones(f);
 
 			void *v = linearMemAlign(mdlheader.numVerts * mdlheader.sv,
 									 0x1000); // aligned to page size

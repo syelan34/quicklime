@@ -1,10 +1,8 @@
 #pragma once
 
-#include "c3d/types.h"
-#include "c3d/uniforms.h"
-#include "util/renderqueue.h"
 #include "shaders/color.h"
 #include "shaders/texture.h"
+#include "util/renderqueue.h"
 #include <citro3d.h>
 #include <memory>
 #include <optional>
@@ -52,10 +50,10 @@ namespace ql {
 
 	  public:
 		RenderQueue queue;
-		virtual ~shader()												  = 0;
-		virtual void resetMaterial()									  = 0;
-		virtual void setMaterial(C3D_Mtx *modelview, C3D_Mtx *projection) = 0;
-		
+		virtual ~shader()			 = 0;
+		virtual void resetMaterial() = 0;
+		virtual void setMaterial()	 = 0;
+
 		void setFVUniform(std::string name, C3D_FVec value);
 		void setFVUniform(int id, C3D_FVec value);
 		void setBUniform(std::string name, bool value);

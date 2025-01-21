@@ -1,14 +1,17 @@
-#include "c3d/types.h"
 #include "camera.h"
+#include "c3d/maths.h"
+#include "c3d/types.h"
+#include "c3d/uniforms.h"
 #include "componentmanager.h"
 #include "config.h"
 #include "gameobject.h"
+#include "light.h"
+#include "lights.h"
 #include "ql_assert.h"
 #include "renderer.h"
 #include "scene.h"
+#include "shared_unif_locations.h"
 #include "transform.h"
-#include "lights.h"
-#include "light.h"
 #include <3ds.h>
 #include <citro3d.h>
 #include <utility>
@@ -50,7 +53,8 @@ namespace ql {
 					C3D_RenderTargetClear(target[2], C3D_CLEAR_ALL, backgroundColour, 0);
 				} else {
 					C3D_RenderTargetClear(target[0], C3D_CLEAR_ALL, backgroundColour, 0);
-					if (use3D) C3D_RenderTargetClear(target[1], C3D_CLEAR_ALL, backgroundColour, 0);
+					if (use3D)
+						C3D_RenderTargetClear(target[1], C3D_CLEAR_ALL, backgroundColour, 0);
 				}
 				break;
 			case DISPLAY_BOTTOM:
@@ -67,14 +71,14 @@ namespace ql {
 			float nearClip = 0.1f, farClip = 1000.f;
 			uint32_t backgroundColour = 0xFF349beb;
 			// ortho camera properties
-			float height = 24.f;
-			float width	 = 40.f;
+			float height			  = 24.f;
+			float width				  = 40.f;
 			// perspective camera properties
-			float fovY	 = 55.f; // default for splatoon human form
-			bool stereo	 = true; // whether to use 3D
-			bool active	 = true;
-			bool wide	 = true;
-			bool ortho	 = false;
+			float fovY				  = 55.f; // default for splatoon human form
+			bool stereo				  = true; // whether to use 3D
+			bool active				  = true;
+			bool wide				  = true;
+			bool ortho				  = false;
 		};
 
 		template <typename T, typename comparatorfunc_t>
@@ -91,7 +95,7 @@ namespace ql {
 			}
 		}
 
-		void sortObjects(auto culledBuckets, C3D_FVec& position) {
+		void sortObjects(auto culledBuckets, C3D_FVec &position) {
 			auto backToFront = [&](std::pair<Renderer *, transform *> &a, std::pair<Renderer *, transform *> b) {
 				const C3D_FVec delta_a = FVec3_Subtract(a.second->position, position);
 				const C3D_FVec delta_b = FVec3_Subtract(b.second->position, position);
@@ -117,27 +121,27 @@ namespace ql {
 	} // namespace
 
 	bool Camera::cameraObjectListDirty = true;
-	
+
 	Camera::Camera(GameObject &owner, const void *args) {
 		ASSERT(args != nullptr, "Invalid camera constructor arg");
 		target_init();
 		cam_args c;
 		if (args)
 			c = *(cam_args *)args;
-		parent = &owner;
-		active		  = c.active;
-		stereoEnabled = c.stereo;
-		highRes		  = c.wide & !stereoEnabled & !config::wideIsUnsupported;
+		parent			 = &owner;
+		active			 = c.active;
+		stereoEnabled	 = c.stereo;
+		highRes			 = c.wide & !stereoEnabled & !config::wideIsUnsupported;
 		backgroundColour = c.backgroundColour;
-		display = c.display;
-		cullingMask = c.layermask;
-		nearClip = c.nearClip;
-		farClip = c.farClip;
-		height = c.height;
-		width = c.width;
-		orthographic = c.ortho;
-		fovY = c.fovY;
-		iodMapFunc = defaultIodMapFunc;
+		display			 = c.display;
+		cullingMask		 = c.layermask;
+		nearClip		 = c.nearClip;
+		farClip			 = c.farClip;
+		height			 = c.height;
+		width			 = c.width;
+		orthographic	 = c.ortho;
+		fovY			 = c.fovY;
+		iodMapFunc		 = defaultIodMapFunc;
 	}
 
 	Camera::~Camera() {}
@@ -157,43 +161,57 @@ namespace ql {
 		// split all objects into buckets
 		if (cameraObjectListDirty) {
 			cameraObjectListDirty = false;
-			for (auto& bucket : culledBuckets) bucket.clear();
+			for (auto &bucket : culledBuckets)
+				bucket.clear();
 			parent->s
 				.reg
 				.view<Renderer, transform>()
 				.each(
 					[&](auto &renderer, auto &transform) {
 						// do culling here
-						culledBuckets[renderer.queue()].emplace_back(&renderer, &transform);
+						if (renderer.layer() & cullingMask) culledBuckets[renderer.queue()].emplace_back(&renderer, &transform);
 					});
 		}
 		// sort
 		transform *t	  = parent->getComponent<transform>();
+		ASSERT(t != nullptr, "No transform component");
 		C3D_FVec position = t->position;
 		C3D_Mtx view	  = *t;
 		Mtx_Inverse(&view);
-		C3D_Mtx modelView[2];
-		Mtx_Multiply(&modelView[0], &cameraMatrix[0], &view);
-		Mtx_Multiply(&modelView[1], &cameraMatrix[1], &view);
+		C3D_Mtx viewProj[2];
+		Mtx_Multiply(&viewProj[0], &cameraMatrix[0], &view);
+		Mtx_Multiply(&viewProj[1], &cameraMatrix[1], &view);
 
 		sortObjects(culledBuckets, position);
-		
+
 		// set lights
 		C3D_LightEnvBind(&lights::shared_lightenv);
 
 		parent->s.reg.view<Light>().each([&](auto &light) { light.setSelf(view); });
 
+		// set uniforms
+		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_v_loc, &view);
+		C3D_FVUnifSet(GPU_VERTEX_SHADER, ql::shared_unifs::screenparams_loc, FVec4_New(screenwidth, screenheight, display, highRes));
+		
+		
+		// per-eye uniforms
+		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_vp_loc, &viewProj[0]);
+		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_p_loc, &cameraMatrix[0]);
+		
 		// draw
 		for (auto &bucket : culledBuckets) {
 			for (auto &object : bucket) {
-				object.first->render(view, modelView[0], cullingMask);
+				object.first->render(view, cameraMatrix[0]);
 			}
 		}
 		if (use3D) { // second eye
 			C3D_FrameDrawOn(target[1]);
+			// per-eye uniforms
+			C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_vp_loc, &viewProj[1]);
+			C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_p_loc, &cameraMatrix[1]);
 			for (auto &bucket : culledBuckets) {
 				for (auto &object : bucket) {
-					object.first->render(view, modelView[1], cullingMask);
+					object.first->render(view, cameraMatrix[0]);
 				}
 			}
 		}
