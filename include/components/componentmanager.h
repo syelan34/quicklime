@@ -68,5 +68,5 @@ namespace ql {
 } // namespace ql
 
 #define COMPONENT_REGISTER(component)                                          \
-	volatile bool component##_component =                                               \
+	static volatile bool component##_component =                                               \
 		::ql::ComponentManager::registerComponent<component>(#component);

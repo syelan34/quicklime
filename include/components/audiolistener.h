@@ -2,13 +2,14 @@
 
 namespace ql {
 	class GameObject;
-	class AudioListener {
+	class Listener {
 		friend class AudioManager;
 		friend class AudioSource;
 		GameObject *parent;
 		bool active;
 
 	  public:
-		AudioListener(GameObject &owner, const void *data);
+		Listener(GameObject &owner, const void *data);
+		void update();
 	};
 } // namespace ql

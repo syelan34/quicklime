@@ -8,6 +8,7 @@
 #include <list>
 #include <stdio.h>
 #include <string>
+#include <bullet/btBulletDynamicsCommon.h>
 
 namespace ql {
 	class Scene {
@@ -17,6 +18,13 @@ namespace ql {
 		// needs to be a list so it doesn't get reallocated (sad)
 		std::list<GameObject> objects;
 		entt::registry reg;
+		
+		// physics
+		btBroadphaseInterface*                  _broadphase;
+	    btDefaultCollisionConfiguration*        _collisionConfiguration;
+	    btCollisionDispatcher*                  _dispatcher;
+	    btSequentialImpulseConstraintSolver*    _solver;
+	    btDiscreteDynamicsWorld*                _world;
 
 		friend class SceneLoader;
 		friend class Camera;

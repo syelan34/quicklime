@@ -1,6 +1,7 @@
 #pragma once
 
 #include <citro3d.h>
+
 namespace ql {
 	class GameObject;
 

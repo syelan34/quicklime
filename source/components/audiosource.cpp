@@ -57,8 +57,8 @@ namespace ql {
 			rvol = 0;
 		} else {
 			GameObject *l = nullptr;
-			parent->s.reg.view<AudioListener>().each(
-				[&](AudioListener &listener) {
+			parent->s.reg.view<Listener>().each(
+				[&](Listener &listener) {
 					if (listener.active)
 						l = listener.parent;
 				});

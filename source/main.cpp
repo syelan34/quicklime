@@ -33,8 +33,9 @@ namespace {
 		ql::Console::init();
 		ql::ComponentManager::init();
 		ql::AudioManager::init();
-		ql::physicsInit(21887825); // 20ms tick speed
+		// ql::physicsInit(21887825); // 20ms tick speed
 		// ql::physicsInit(54719563); // 50ms tick speed
+		ql::physicsInit(20.f);
 
 		ql::SceneLoader::load(ql::scenename);
 	}

@@ -30,7 +30,7 @@ CFLAGS	:=	-Wall -O0 -ggdb -mword-relocations \
 			-ffunction-sections \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -D__3DS__ -lm `/opt/devkitpro/portlibs/3ds/bin/arm-none-eabi-pkg-config opusfile libmpg123 --cflags` 
+CFLAGS	+=	$(INCLUDE) -D__3DS__ -lm `/opt/devkitpro/portlibs/3ds/bin/arm-none-eabi-pkg-config opusfile libmpg123 bullet --cflags` 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++2b
 
 ASFLAGS	:=	-g $(ARCH)

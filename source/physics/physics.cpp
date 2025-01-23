@@ -59,7 +59,14 @@ void ql::physicsInit(uint64_t tickspeed) {
 	svcCreateTimer(&timer, RESET_PULSE);
 	svcSetTimer(timer, 0, tickspeed);
 	svcCreateEvent(&event, RESET_ONESHOT);
-	threadCreate(physicsThread, NULL, PHYSICS_THREAD_STACK_SZ, 0x18, -1, true);
+	threadCreate(physicsThread, NULL, PHYSICS_THREAD_STACK_SZ, 0x18, 0, true);
+}
+
+void ql::physicsInit(float tickspeed) {
+	svcCreateTimer(&timer, RESET_PULSE);
+	svcSetTimer(timer, 0, (965914*tickspeed+2119489)); // calculated experimentally
+	svcCreateEvent(&event, RESET_ONESHOT);
+	threadCreate(physicsThread, NULL, PHYSICS_THREAD_STACK_SZ, 0x18, 0, true);
 }
 
 void ql::physicsExit() { exitphys = true; }

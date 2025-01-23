@@ -1,5 +1,4 @@
 #include "meshrenderer.h"
-#include "c3d/maths.h"
 #include "componentmanager.h"
 #include "defines.h"
 #include "mesh.h"
@@ -8,8 +7,9 @@
 #include "slmdlloader.h"
 #include "stats.h"
 #include "transform.h"
-#include <string>
+#include <citro3d.h>
 #include <concepts>
+#include <string>
 
 namespace ql {
 	namespace {
@@ -17,15 +17,15 @@ namespace ql {
 			RendererType type; // useless but is used for parent class so still necessary to include
 			unsigned int layer;
 			char data;
-		   // mesh name
-		   // material file
+			// mesh name
+			// material file
 		};
 	} // namespace
 
-	MeshRenderer::MeshRenderer(GameObject &obj, const void *data): parent(&obj) { // parent will never be null
+	MeshRenderer::MeshRenderer(GameObject &obj, const void *data) : parent(&obj) { // parent will never be null
 		ASSERT(data != nullptr, "Mesh parameter was null");
-		meshrenderer_args& args = *(meshrenderer_args*)data;
-		std::string meshpath = &args.data;
+		meshrenderer_args &args = *(meshrenderer_args *)data;
+		std::string meshpath	= &args.data;
 		ASSERT(meshpath.size() > 0, "Model path is empty");
 		Console::log("Mesh path: %s", meshpath.c_str());
 		std::string matpath = &args.data + meshpath.size() + 1;
@@ -75,7 +75,7 @@ namespace ql {
 		return *this;
 	}
 
-	MeshRenderer::MeshRenderer(MeshRenderer &&other): meshdata(std::move(other.meshdata)), mat(std::move(other.mat)), parent(other.parent) {
+	MeshRenderer::MeshRenderer(MeshRenderer &&other) : meshdata(std::move(other.meshdata)), mat(std::move(other.mat)), parent(other.parent) {
 		other.parent = nullptr;
 	}
 
