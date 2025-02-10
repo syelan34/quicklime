@@ -7,9 +7,19 @@
 #include "ql_time.h"
 #include "shared_unif_locations.h"
 #include <cmath>
+#include <bullet/btBulletDynamicsCommon.h>
+#include <threads.h>
 
 namespace ql {
-	Scene::Scene(std::string name) : _name(name), name(_name) {
+	Scene::Scene(std::string name): 
+	    _name(name), 
+		_broadphase(new btDbvtBroadphase()), 
+		_collisionConfiguration(new btDefaultCollisionConfiguration()), 
+		_dispatcher(new btCollisionDispatcher(_collisionConfiguration)), 
+		_solver(new btSequentialImpulseConstraintSolver()), 
+		_world(new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration)), 
+		name(_name) 
+	{
 		LightLock_Init(&lock);
 	}
 
@@ -49,14 +59,13 @@ namespace ql {
 
 	void Scene::fixedUpdate() {
 		LightLock_Guard l(lock);
-		// all the physics stuff will go here
 		act_on_objects(&GameObject::FixedUpdate);
 	};
 
 	void Scene::draw() {
-		LightLock_Lock(&lock);
+	    LightLock_Guard l(lock);
+		
 		C3D_FVUnifSet(GPU_VERTEX_SHADER, shared_unifs::time_loc, FVec4_New(Time::curTime, std::sin(Time::curTime), std::cos(Time::curTime), Time::deltaTime));
 		reg.view<Camera>().each([](auto &cam) { cam.Render(); });
-		LightLock_Unlock(&lock);
 	};
 } // namespace ql

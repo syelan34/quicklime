@@ -1,5 +1,4 @@
 #include "meshrenderer.h"
-#include "c3d/maths.h"
 #include "componentmanager.h"
 #include "defines.h"
 #include "mesh.h"
@@ -9,6 +8,7 @@
 #include "slmdlloader.h"
 #include "stats.h"
 #include "transform.h"
+#include <citro3d.h>
 #include <concepts>
 #include <string>
 
@@ -18,8 +18,12 @@ namespace ql {
 			RendererType type; // useless but is used for parent class so still necessary to include
 			unsigned int layer;
 			char data;
+<<<<<<< HEAD
 			// mesh file
 			// shader file
+=======
+			// mesh name
+>>>>>>> main
 			// material file
 		};
 	} // namespace
@@ -50,6 +54,7 @@ namespace ql {
 
 		// always will have a transform
 		// safe since pointer isn't stored
+<<<<<<< HEAD
 		C3D_Mtx model = *parent->getComponent<transform>();
 		C3D_Mtx out;
 		Mtx_Multiply(&out, &model, &view);
@@ -60,6 +65,12 @@ namespace ql {
 		
 		// set shader values
 		mat->setMaterial();
+=======
+		C3D_Mtx model = *parent->getComponent<Transform>();
+		Mtx_Multiply(&model, &view, &model);
+
+		mat->setMaterial(&model, &projection);
+>>>>>>> main
 
 		// LOD system
 		float distance2 = model.r[0].w * model.r[0].w +

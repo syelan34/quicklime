@@ -1,32 +1,33 @@
 #pragma once
 
 #include <citro3d.h>
+
 namespace ql {
 	class GameObject;
 
-	class transform {
+	class Transform {
 		C3D_FVec _position;
 		C3D_FQuat _rotation;
 		C3D_FVec _scale;
 		LightLock _l;
 
 	  public:
-		const C3D_FVec &position  = _position;
+		C3D_FVec &position  = _position;
 		const C3D_FQuat &rotation = _rotation;
 		const C3D_FVec &scale	  = _scale;
 
-		~transform();
+		~Transform();
 
-		transform(); // sets position, rotation, and scale to do nothing
+		Transform(); // sets position, rotation, and scale to do nothing
 
 		// constructor to be used when data created by componentmanager
-		transform(GameObject &parent, const void *data);
+		Transform(GameObject &parent, const void *data);
 
-		transform(C3D_FVec position	 = {{1, 0, 0, 0}},
+		Transform(C3D_FVec position	 = {{1, 0, 0, 0}},
 				  C3D_FQuat rotation = {{1, 0, 0, 0}},
 				  C3D_FVec scale	 = {{1, 1, 1, 1}});
 		;
-		transform &operator=(transform &&other);
+		Transform &operator=(Transform &&other);
 		/**
 		 * @brief Adds offset to current position
 		 */

@@ -95,8 +95,8 @@ namespace ql {
 			}
 		}
 
-		void sortObjects(auto culledBuckets, C3D_FVec &position) {
-			auto backToFront = [&](std::pair<Renderer *, transform *> &a, std::pair<Renderer *, transform *> b) {
+		void sortObjects(auto culledBuckets, C3D_FVec& position) {
+			auto backToFront = [&](std::pair<Renderer *, Transform *> &a, std::pair<Renderer *, Transform *> b) {
 				const C3D_FVec delta_a = FVec3_Subtract(a.second->position, position);
 				const C3D_FVec delta_b = FVec3_Subtract(b.second->position, position);
 				const float dista2	   = delta_a.x * delta_a.x + delta_a.y * delta_a.y + delta_a.z * delta_a.z;
@@ -104,7 +104,7 @@ namespace ql {
 
 				return dista2 < distb2;
 			};
-			auto frontToBack = [&](std::pair<Renderer *, transform *> &a, std::pair<Renderer *, transform *> b) {
+			auto frontToBack = [&](std::pair<Renderer *, Transform *> &a, std::pair<Renderer *, Transform *> b) {
 				const C3D_FVec delta_a = FVec3_Subtract(a.second->position, position);
 				const C3D_FVec delta_b = FVec3_Subtract(b.second->position, position);
 				const float dista2	   = delta_a.x * delta_a.x + delta_a.y * delta_a.y + delta_a.z * delta_a.z;
@@ -165,7 +165,7 @@ namespace ql {
 				bucket.clear();
 			parent->s
 				.reg
-				.view<Renderer, transform>()
+				.view<Renderer, Transform>()
 				.each(
 					[&](auto &renderer, auto &transform) {
 						// do culling here
@@ -173,7 +173,7 @@ namespace ql {
 					});
 		}
 		// sort
-		transform *t	  = parent->getComponent<transform>();
+		auto *t	  = parent->getComponent<Transform>();
 		ASSERT(t != nullptr, "No transform component");
 		C3D_FVec position = t->position;
 		C3D_Mtx view	  = *t;

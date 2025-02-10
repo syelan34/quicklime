@@ -3,16 +3,14 @@
 #include "gameobject.h"
 
 namespace ql {
-	AudioListener::AudioListener(GameObject &owner, const void *data)
+	Listener::Listener(GameObject &owner, const void *data)
 		: parent(&owner), active(true) {
 		(void)data;
 	}
+	void Listener::update() {
+		static int n = 0;
+		n = n + n;
+	}
 
-	COMPONENT_REGISTER(AudioListener);
+	COMPONENT_REGISTER(Listener);
 } // namespace ql
-
-bool test() {
-	ql::Console::log("text");
-}
-
-bool testvar = test();

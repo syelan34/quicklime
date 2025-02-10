@@ -5,6 +5,9 @@
 #include <citro2d.h>
 #include <citro3d.h>
 
+// gameobjects
+#include "util/gameobject.h"
+
 // scenes
 #include "scenes/sceneloader.h"
 
