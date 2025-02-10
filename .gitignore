@@ -8,3 +8,6 @@ compile_commands.json
 .cache/
 lib/
 .clangd
+.clang-format
+build.sh
+compdb.sh

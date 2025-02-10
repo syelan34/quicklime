@@ -1,10 +1,11 @@
 #include "gameobject.h"
-#include "3ds/synchronization.h"
+#include <3ds.h>
 #include "console.h"
 #include "scene.h"
 #include "script.h"
 #include "threads.h"
 #include "camera.h"
+#include <sstream>
 
 ql::GameObject::GameObject(std::string name, Scene &s)
 	: s(s), reg(s.reg), id(s.reg.create()), name(name) {
@@ -22,6 +23,11 @@ ql::GameObject::GameObject(GameObject &&other)
 	other.children.clear();
 }
 
+void ql::GameObject::addChild(GameObject &object) {
+	object.setParent(*this);
+	children.push_back(&object);
+}
+
 void ql::GameObject::Awake() {
 	LightLock_Guard l(_scriptL);
 	for (auto &s : scripts) {
@@ -29,34 +35,66 @@ void ql::GameObject::Awake() {
 		s->SetEnabled(true);
 	}
 }
-
 void ql::GameObject::Start() {
 	LightLock_Guard l(_scriptL);
 	for (auto &s : scripts)
 		if (s->enabled)
 			s->Start();
 }
-
 void ql::GameObject::Update() {
 	LightLock_Guard l(_scriptL);
 	for (auto &s : scripts)
 		if (s->enabled)
 			s->Update();
 }
-
 void ql::GameObject::LateUpdate() {
 	LightLock_Guard l(_scriptL);
 	for (auto &s : scripts)
 		if (s->enabled)
 			s->LateUpdate();
 }
-
 void ql::GameObject::FixedUpdate() {
 	LightLock_Guard l(_scriptL);
 	for (auto &s : scripts)
 		if (s->enabled)
 			s->FixedUpdate();
 }
+void ql::GameObject::OnCollisionEnter(void) {
+    LightLock_Guard l(_scriptL);
+    for (auto &s : scripts)
+        if (s->enabled)
+            s->OnCollisionEnter();
+};
+void ql::GameObject::OnCollisionStay(void) {
+    LightLock_Guard l(_scriptL);
+    for (auto &s : scripts)
+        if (s->enabled)
+            s->OnCollisionStay();
+};
+void ql::GameObject::OnCollisionExit(void) {
+    LightLock_Guard l(_scriptL);
+    for (auto &s : scripts)
+        if (s->enabled)
+            s->OnCollisionExit();
+};
+void ql::GameObject::OnTriggerEnter(void) {
+    LightLock_Guard l(_scriptL);
+    for (auto &s : scripts)
+        if (s->enabled)
+            s->OnTriggerEnter();
+};
+void ql::GameObject::OnTriggerStay(void) {
+    LightLock_Guard l(_scriptL);
+    for (auto &s : scripts)
+        if (s->enabled)
+            s->OnTriggerStay();
+};
+void ql::GameObject::OnTriggerExit(void) {
+    LightLock_Guard l(_scriptL);
+    for (auto &s : scripts)
+        if (s->enabled)
+            s->OnTriggerExit();
+};
 
 ql::GameObject *ql::GameObject::r_search(std::string name) {
 	GameObject *out = NULL;
@@ -94,7 +132,7 @@ ql::GameObject *ql::GameObject::find(std::string name) {
 				return nullptr;
 			}
 		} else if (name[1] == '/') // find in own children
-		{
+		{ 
 			std::stringstream ss;
 			ss << name.substr(2); // remove the './'
 			std::string subname;

@@ -1,11 +1,8 @@
 #include "sceneloader.h"
-#include "aligned_uptr.h"
 #include "base64.hpp"
 #include "componentmanager.h"
-#include "config.h"
 #include "console.h"
 #include "defines.h"
-#include "exceptions.h"
 #include "gameobject.h"
 #include "ql_assert.h"
 #include "readfile.h"
@@ -15,12 +12,10 @@
 #include <3ds.h>
 #include <cctype>
 #include <fstream>
-#include <iostream>
 #include <memory>
 #include <stdlib.h>
 #include <string>
 #include <string_view>
-#include <type_traits>
 
 namespace ql {
 	// helper functions for the loader
@@ -37,26 +32,13 @@ namespace ql {
 		void remove_whitespace(auto &str) {
 			char *pc = str.get(), *pd = pc;
 			do {
-				while (std::isspace(*pc))
+				while (std::isspace(*pc)) // skip whitespace
 					pc++;
-			} while ((*pd++ = *pc++)); // remove whitespace
-		}
-
-		[[maybe_unused]] void exceptionHandler2(void) {
-			// uninstall handler
-			uninstallExceptionHandler();
-
-			register unsigned int lr asm("lr"); // might work? idk
-			unsigned int lrval = lr;
-			Console::error("Scene Load Thread Crashed.");
-			Console::error("lr: %p", lrval);
-			threadExit(0);
+			} while ((*pd++ = *pc++)); // copy over
 		}
 	} // namespace
 
 	void sceneLoadThread(void *params) {
-		// setup exception handler
-		// installExceptionHandler(exceptionHandler2);
 
 		if (!params) {
 			Console::error("Params are null");
@@ -170,10 +152,8 @@ namespace ql {
 	void SceneLoader::parseChildren(std::unique_ptr<Scene> &s,
 									GameObject &object,
 									std::string_view &input) {
-		unsigned int n = 0;
 		while (input[0] != ']' && input.size() > 0) {
 			parseObject(s, input);
-			++n;
 			object.addChild(s->objects.back());
 		}
 		input.remove_prefix(input.find(']') + 1);
@@ -185,10 +165,8 @@ namespace ql {
 										 GameObject &object,
 										 std::string_view &input,
 										 unsigned int size, float &progress) {
-		unsigned int n = 0;
 		while (input[0] != ']' && input.size() > 0) {
 			parseObjectAsync(s, input, size, progress);
-			++n;
 			object.addChild(s->objects.back());
 		}
 		input.remove_prefix(input.find(']') + 1);
@@ -263,9 +241,7 @@ namespace ql {
 								   GameObject &object,
 								   std::string_view &input) {
 		while (input[0] != ']') { // ] means end of the section
-			if (input.find(',') <
-				input.find(']')) { // this means there is a , closer than a ] so
-								   // there must be at least another value
+			if (input.find(',') < input.find(']')) { // this means there is a , closer than a ] so there must be at least another value
 				ComponentManager::addScript(
 					std::string(input.substr(0, input.find(']'))).c_str(),
 					object);

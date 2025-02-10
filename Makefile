@@ -6,6 +6,8 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
+export GENERATE_COMPILE_COMMANDS=1
+TOPDIR ?= $(CURDIR)
 include $(DEVKITARM)/3ds_rules
 
 #---------------------------------------------------------------------------------
@@ -19,18 +21,18 @@ TARGET		:=	$(shell basename $(CURDIR))
 BUILD		:=	build
 SOURCES		:=  source source/components source/scenes source/audio source/util source/shaders source/physics source/audio/decoders
 DATA		:=	data
-INCLUDES	:=	include include/components include/audio include/scenes include/util include/shaders include/physics include/entt 
+INCLUDES	:=	include include/components include/audio include/scenes include/util include/shaders include/physics include/entt
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 
-CFLAGS	:=	-Wall -O0 -ggdb -mword-relocations \
+CFLAGS	:=	-Wall -Og -ggdb -mword-relocations \
 			-ffunction-sections \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -D__3DS__ -lm `/opt/devkitpro/portlibs/3ds/bin/arm-none-eabi-pkg-config opusfile libmpg123 --cflags` 
+CFLAGS	+=	$(INCLUDE) -D__3DS__ -lm `/opt/devkitpro/portlibs/3ds/bin/arm-none-eabi-pkg-config opusfile libmpg123 bullet --cflags` 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++2b
 
 ASFLAGS	:=	-g $(ARCH)

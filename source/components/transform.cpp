@@ -4,23 +4,23 @@
 #include <cmath>
 
 namespace ql {
-	transform::transform()
+	Transform::Transform()
 		: _position({{1, 0, 0, 0}}), _rotation({{1, 0, 0, 0}}),
 		  _scale({{1, 1, 1, 1}}){};
-	transform::transform(GameObject &parent, const void *data)
+	Transform::Transform(GameObject &parent, const void *data)
 		: _position({{1, 0, 0, 0}}), _rotation({{1, 0, 0, 0}}),
 		  _scale({{1, 1, 1, 1}}) {
 		if (data) {
-			_position = (*(transform *)data).position;
-			_rotation = (*(transform *)data).rotation;
-			_scale	  = (*(transform *)data).scale;
+			_position = (*(Transform *)data).position;
+			_rotation = (*(Transform *)data).rotation;
+			_scale	  = (*(Transform *)data).scale;
 		}
 	}
 
-	transform::transform(C3D_FVec position, C3D_FQuat rotation, C3D_FVec scale)
+	Transform::Transform(C3D_FVec position, C3D_FQuat rotation, C3D_FVec scale)
 		: _position(position), _rotation(rotation), _scale(scale){};
 
-	transform &transform::operator=(transform &&other) {
+	Transform &Transform::operator=(Transform &&other) {
 		_position = other._position;
 		_rotation = other._rotation;
 		_scale	  = other._scale;
@@ -28,45 +28,48 @@ namespace ql {
 		return *this;
 	}
 
-	void transform::translate(C3D_FVec offset) {
+	void Transform::translate(C3D_FVec offset) {
 		LightLock_Guard l(_l);
 		_position.x += offset.x;
 		_position.y += offset.y;
 		_position.z += offset.z;
 	}
 
-	void transform::rotate(C3D_FVec offset, bool local) {
+	void Transform::rotate(C3D_FVec offset, bool local) {
 		LightLock_Guard l(_l);
 		_rotation = Quat_RotateZ(rotation, offset.z, local);
 		_rotation = Quat_RotateX(rotation, offset.x, local);
 		_rotation = Quat_RotateY(rotation, offset.y, local);
 	}
 
-	void transform::rotateX(float angle, bool local) {
+	void Transform::rotateX(float angle, bool local) {
 		LightLock_Guard l(_l);
 		_rotation = Quat_RotateX(rotation, angle, local);
 	}
-	void transform::rotateY(float angle, bool local) {
+	void Transform::rotateY(float angle, bool local) {
 		LightLock_Guard l(_l);
 		_rotation = Quat_RotateY(rotation, angle, local);
 	}
-	void transform::rotateZ(float angle, bool local) {
+	void Transform::rotateZ(float angle, bool local) {
 		LightLock_Guard l(_l);
 		_rotation = Quat_RotateZ(rotation, angle, local);
 	}
 
-	void transform::setRotation(C3D_FVec attitude, bool local) {
+	void Transform::setRotation(C3D_FVec attitude, bool local) {
 		LightLock_Guard l(_l);
 		_rotation =
 			Quat_FromPitchYawRoll(attitude.x, attitude.y, attitude.z, local);
 	}
 
-	void transform::rotate(C3D_FVec offset, C3D_FVec origin) {
+	void Transform::rotate(C3D_FVec offset, C3D_FVec origin) {
 		LightLock_Guard l(_l);
-		C3D_FVec posoffset = {{position.x - origin.x, position.y - origin.y,
-							   position.z - origin.z}};
-		C3D_FQuat rot =
-			Quat_FromPitchYawRoll(offset.x, offset.y, offset.z, false);
+		C3D_FVec posoffset = {{
+		    position.x - origin.x, 
+			position.y - origin.y,
+			position.z - origin.z
+		}};
+		
+		C3D_FQuat rot = Quat_FromPitchYawRoll(offset.x, offset.y, offset.z, false);
 		_position = Quat_CrossFVec3(rot, posoffset);
 		_position.x += origin.x;
 		_position.y += origin.y;
@@ -74,7 +77,7 @@ namespace ql {
 		_rotation = Quat_Multiply(rot, rotation);
 	}
 
-	C3D_FQuat transform::slerp(C3D_FQuat qa, C3D_FQuat qb, double t) {
+	C3D_FQuat Transform::slerp(C3D_FQuat qa, C3D_FQuat qb, double t) {
 		// quaternion to return
 		C3D_FQuat qm;
 
@@ -113,7 +116,7 @@ namespace ql {
 		return qm;
 	}
 
-	C3D_FVec transform::eulerAngles() const {
+	C3D_FVec Transform::eulerAngles() const {
 		C3D_FVec angles;
 		C3D_FQuat q		= rotation;
 
@@ -135,7 +138,7 @@ namespace ql {
 		return angles;
 	}
 
-	transform::operator C3D_Mtx() const {
+	Transform::operator C3D_Mtx() const {
 		C3D_Mtx m, rot;
 
 		Mtx_FromQuat(&rot, rotation);
@@ -149,7 +152,7 @@ namespace ql {
 		return m;
 	}
 
-	transform::~transform() {}
+	Transform::~Transform() {}
 
-	COMPONENT_REGISTER(transform)
+	COMPONENT_REGISTER(Transform)
 } // namespace ql

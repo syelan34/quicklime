@@ -57,16 +57,16 @@ namespace ql {
 			rvol = 0;
 		} else {
 			GameObject *l = nullptr;
-			parent->s.reg.view<AudioListener>().each(
-				[&](AudioListener &listener) {
+			parent->s.reg.view<Listener>().each(
+				[&](Listener &listener) {
 					if (listener.active)
 						l = listener.parent;
 				});
 			ASSERT(l != nullptr, "No listener in scene");
 
 			float dist =
-				FVec3_Distance(parent->getComponent<transform>()->position,
-							   l->getComponent<transform>()->position);
+				FVec3_Distance(parent->getComponent<Transform>()->position,
+							   l->getComponent<Transform>()->position);
 			float distatten;
 			switch (rolloffMode) {
 			case ROLLOFF_LIN:

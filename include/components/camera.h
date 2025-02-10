@@ -8,7 +8,7 @@
 namespace ql {
 	class GameObject;
 	class Renderer;
-	class transform;
+	class Transform;
 
 	enum DisplayTarget {
 		DISPLAY_TOP	   = 0,
@@ -25,7 +25,7 @@ namespace ql {
 		GameObject *parent;
 		iod_func iodMapFunc = nullptr;
 		DisplayTarget display;
-		std::vector<std::pair<Renderer *, transform *>> culledBuckets[3];
+		std::vector<std::pair<Renderer *, Transform *>> culledBuckets[3];
 		C3D_Mtx cameraMatrix[2];
 		void updateMatrix(float iod);
 

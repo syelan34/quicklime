@@ -2,9 +2,19 @@
 #include "audiosource.h"
 #include "camera.h"
 #include "console.h"
+#include <bullet/btBulletDynamicsCommon.h>
+#include <threads.h>
 
 namespace ql {
-	Scene::Scene(std::string name) : _name(name), name(_name) {
+	Scene::Scene(std::string name): 
+	    _name(name), 
+		_broadphase(new btDbvtBroadphase()), 
+		_collisionConfiguration(new btDefaultCollisionConfiguration()), 
+		_dispatcher(new btCollisionDispatcher(_collisionConfiguration)), 
+		_solver(new btSequentialImpulseConstraintSolver()), 
+		_world(new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration)), 
+		name(_name) 
+	{
 		LightLock_Init(&lock);
 	}
 
@@ -44,13 +54,11 @@ namespace ql {
 
 	void Scene::fixedUpdate() {
 		LightLock_Guard l(lock);
-		// all the physics stuff will go here
 		act_on_objects(&GameObject::FixedUpdate);
 	};
 
 	void Scene::draw() {
-		LightLock_Lock(&lock);
+	    LightLock_Guard l(lock);
 		reg.view<Camera>().each([](auto &cam) { cam.Render(); });
-		LightLock_Unlock(&lock);
 	};
 } // namespace ql

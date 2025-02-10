@@ -1,7 +1,7 @@
 #pragma once
 
-#include "gameobject.h"
-#include "script.h"
+#include "util/gameobject.h"
+#include "components/script.h"
 #include "util/console.h"
 #include <3ds.h>
 #include <entt/entt.hpp>
@@ -68,5 +68,5 @@ namespace ql {
 } // namespace ql
 
 #define COMPONENT_REGISTER(component)                                          \
-	volatile bool component##_component =                                               \
+	static volatile bool component##_component =                                               \
 		::ql::ComponentManager::registerComponent<component>(#component);
