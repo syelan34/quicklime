@@ -15,7 +15,7 @@ namespace ql {
 		LightLock lock;
 		std::string _name;
 		GameObject *root;
-		// needs to be a list so it doesn't get reallocated (sad)
+		// needs to be a list so it doesn't get reallocated (sad perf hit)
 		std::list<GameObject> objects;
 		entt::registry reg;
 		
@@ -31,6 +31,7 @@ namespace ql {
 		friend class AudioSource;
 		friend class AudioManager;
 		friend class GameObject;
+		friend void physicsThread(void *);
 		friend void sceneLoadThread(void *params);
 
 		void act_on_objects(void (GameObject::*action)()) {

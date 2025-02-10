@@ -16,8 +16,20 @@
 #include "physics.h"
 #include "scenename.h"
 
+namespace ql {
+    extern bool programShouldExitGraceful;
+}
+
 namespace {
+    void* stack_top = NULL;
+    ERRF_ExceptionData exception_data = {};
+    void handler(ERRF_ExceptionInfo *excep, CpuRegisters *regs) {
+        ql::Console::error("Main thread crashed");
+        ql::Console::error("Exception type: %d", excep->type);
+        ql::Console::error("PC: %p", regs->pc);
+    }
 	void prgrminit() {
+	    threadOnException(handler, stack_top, &exception_data);
 		gfxInitDefault();
 		C3D_Init(C3D_DEFAULT_CMDBUF_SIZE * 64);
 		C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
@@ -25,7 +37,6 @@ namespace {
 #if CONSOLE
 		consoleInit(GFX_BOTTOM, NULL);
 #endif
-
 		ndspInit();
 		romfsInit();
 		osSetSpeedupEnable(true);
@@ -33,9 +44,9 @@ namespace {
 		ql::Console::init();
 		ql::ComponentManager::init();
 		ql::AudioManager::init();
-		// ql::physicsInit(21887825); // 20ms tick speed
+		ql::physicsInit(21887825); // 20ms tick speed (approximately)
 		// ql::physicsInit(54719563); // 50ms tick speed
-		ql::physicsInit(20.f);
+		// ql::physicsInit(20.f);
 
 		ql::SceneLoader::load(ql::scenename);
 	}
@@ -62,7 +73,7 @@ namespace {
 
 int main() {
 	prgrminit();
-	while (aptMainLoop()) {
+	while (aptMainLoop() && !ql::programShouldExitGraceful) {
 		update();
 		draw();
 	}

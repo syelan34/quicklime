@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gameobject.h"
+#include "util/gameobject.h"
 #include <entt/entt.hpp>
 #include <string>
 
@@ -22,9 +22,15 @@ namespace ql {
 		virtual ~Script(){};
 		virtual void Awake(void){};
 		virtual void Start(void){};
-		virtual void FixedUpdate(void){};
 		virtual void Update(void){};
+		virtual void FixedUpdate(void){};
 		virtual void LateUpdate(void){};
+		virtual void OnCollisionEnter(void){};
+		virtual void OnCollisionStay(void){};
+		virtual void OnCollisionExit(void){};
+		virtual void OnTriggerEnter(void){};
+		virtual void OnTriggerStay(void){};
+		virtual void OnTriggerExit(void){};
 		virtual void OnDisable(void){};
 		virtual void OnEnable(void){};
 	};

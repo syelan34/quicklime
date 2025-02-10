@@ -2,71 +2,85 @@
 #include "console.h"
 #include "defines.h"
 #include "scenemanager.h"
-#include "ql_assert.h"
+#include "rigidbody.h"
 #include "threads.h"
 #include <3ds.h>
-#include <cstdint>
 
 namespace {
 	static Handle event, timer;
-	static bool exitphys = false;
-	// static TickCounter cnt = {};
-	// u64 convert_ticks_to_nanos(u64 ticks) {
-	// 	return config::newmodel ? ((UINT64_C(0x13E466E50) * ticks) >> 32) :
-	// ((UINT64_C(0x3BAD34AEF) * ticks) >> 32);
-	// }
+	static Thread physthreadhandle;
+	static volatile bool exitphys = false;
+	static volatile float timestep = 1.f / 50.f; // default of 50tps
+	static TickCounter cnt = {};
+	static void* stack_top = NULL;
+	static ERRF_ExceptionData exception_data = {};
+	
+	static unsigned int idx = 0;
+	float rollingavg(float val) {
+	    static float ringbuf[256] = {0}; // last 256 values saved
+		++idx;
+		idx &= 0xFF;
+		ringbuf[idx] = val;
+		float sum = 0;
+		for (int v : ringbuf) {
+            sum += v;
+        }
+        return sum / 256.f;
+	}
+	void handler(ERRF_ExceptionInfo *excep, CpuRegisters *regs) {
+	    ql::Console::error("Physics thread crashed");
+		ql::Console::error("Exception type: %d", excep->type);
+		ql::Console::error("PC: %p", regs->pc);
+	}
 } // namespace
 
 void ql::physicsThread(void *) {
+    threadOnException(handler, stack_top, &exception_data);
 	Console::log("Physics thread start");
-	// u64 timestep = 20000000;
-	// u64 maxstep = 100000000;
-	// u64 before = svcGetSystemTick();
+	// osTickCounterStart(&cnt);
 	while (!exitphys) {
+	    osTickCounterStart(&cnt);
 		{
 			LightLock_Guard l(SceneManager::lock);
-			if (SceneManager::currentScene)
-				SceneManager::currentScene->fixedUpdate();
+			if (SceneManager::currentScene) {
+			    SceneManager::currentScene->fixedUpdate();
+			    SceneManager::currentScene->reg
+				    .view<ql::RigidBody>()
+					.each([](auto &rb) { rb.update(); });
+				SceneManager::currentScene->_world->applyGravity();
+				SceneManager::currentScene->_world->stepSimulation(timestep, 10);
+				SceneManager::currentScene->_world->clearForces();
+			}	
 		}
-
-		svcWaitSynchronization(timer, -1);
-
-		// u64 after = svcGetSystemTick();
-		// s64 diff = (s64)(after - before);
-		// if(diff > maxstep)
-		// {
-		//     diff = maxstep;
-		//     before = after;
-		// }
-		// if(diff > 0)
-		// {
-		//     u64 t = convert_ticks_to_nanos(diff);
-		// 	Console::log("New wait time %llu", t);
-		//     Result res = svcWaitSynchronization(event, t);
-		// 	ASSERT((res & 0x3FF) == 0x3FE, "Invalid wait result")
-
-		//     before += timestep;
-		// }
-		// else if(diff <= -maxstep)
-		// {
-		//     before = after - maxstep;
-		// }
+		osTickCounterUpdate(&cnt);
+		float timemillis = osTickCounterRead(&cnt);
+		float avg = rollingavg(timemillis);
+		Console::log("exp:%3.0f s:%2.3f e:%f a:%f", timestep, timemillis, timemillis - timestep, avg, avg);
+		svcWaitSynchronization(timer, U64_MAX);
 	}
 	Console::log("Physics thread exit");
 }
 
-void ql::physicsInit(uint64_t tickspeed) {
+void ql::physicsInit(int tickspeed) {
+    Console::log("int ver.");
+    timestep = (tickspeed-2119489.f)/965914.f; // calculated experimentally
+    Console::log("%f", timestep);
 	svcCreateTimer(&timer, RESET_PULSE);
-	svcSetTimer(timer, 0, tickspeed);
+	svcSetTimer(timer, 0, tickspeed/10);
 	svcCreateEvent(&event, RESET_ONESHOT);
-	threadCreate(physicsThread, NULL, PHYSICS_THREAD_STACK_SZ, 0x18, 0, true);
+	physthreadhandle = threadCreate(physicsThread, NULL, PHYSICS_THREAD_STACK_SZ, 0x18, -1, false);
 }
 
 void ql::physicsInit(float tickspeed) {
+    Console::log("float ver.");
+    timestep = tickspeed;
 	svcCreateTimer(&timer, RESET_PULSE);
-	svcSetTimer(timer, 0, (965914*tickspeed+2119489)); // calculated experimentally
+	svcSetTimer(timer, 0, (96591*tickspeed+211948)); // calculated experimentally
 	svcCreateEvent(&event, RESET_ONESHOT);
-	threadCreate(physicsThread, NULL, PHYSICS_THREAD_STACK_SZ, 0x18, 0, true);
+	physthreadhandle = threadCreate(physicsThread, NULL, PHYSICS_THREAD_STACK_SZ, 0x18, -1, false);
 }
 
-void ql::physicsExit() { exitphys = true; }
+void ql::physicsExit() { 
+    exitphys = true;
+    threadJoin(physthreadhandle, U64_MAX);
+}

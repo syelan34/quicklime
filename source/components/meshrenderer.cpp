@@ -48,7 +48,7 @@ namespace ql {
 
 		// always will have a transform
 		// safe since pointer isn't stored
-		C3D_Mtx model = *parent->getComponent<transform>();
+		C3D_Mtx model = *parent->getComponent<Transform>();
 		Mtx_Multiply(&model, &view, &model);
 
 		mat->setMaterial(&model, &projection);

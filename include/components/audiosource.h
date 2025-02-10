@@ -2,9 +2,8 @@
 
 #include "audio/audiomanager.h"
 #include "util/gen_lut.h"
-#include <array>
-#include <cmath>
 #include <cstdlib>
+#include <cmath>
 #include <string>
 
 namespace ql {

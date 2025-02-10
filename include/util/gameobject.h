@@ -1,12 +1,12 @@
 #pragma once
 
-#include "util/threads.h"
 #include <algorithm>
 #include <entt/entt.hpp>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <vector>
+#include <3ds.h>
+
 namespace ql {
 	class Scene;
 	class Script;
@@ -37,11 +37,18 @@ namespace ql {
 
 		operator entt::entity() { return id; }
 
+		// message passthrough
+		void Awake(void);
 		void Start(void);
 		void Update(void);
 		void FixedUpdate(void);
 		void LateUpdate(void);
-		void Awake(void);
+		void OnCollisionEnter(void);
+		void OnCollisionStay(void);
+		void OnCollisionExit(void);
+		void OnTriggerEnter(void);
+		void OnTriggerStay(void);
+		void OnTriggerExit(void);
 
 		/**
 		 * @brief Adds a component to GameObject at runtime. If the GameObject
@@ -72,10 +79,7 @@ namespace ql {
 		 *
 		 * @param object Reference to GameObject to add as child
 		 */
-		inline void addChild(GameObject &object) {
-			object.setParent(*this);
-			children.push_back(&object);
-		}
+		void addChild(GameObject &object);
 
 		/**
 		 * @brief Removes object from list of children

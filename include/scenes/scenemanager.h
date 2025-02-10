@@ -2,12 +2,8 @@
 
 #include "scene.h"
 #include "sceneloader.h"
-#include "threads.h"
 #include <citro3d.h>
 #include <memory>
-#include <string>
-#include <type_traits>
-#include <utility>
 
 namespace ql {
 	// TODO needs to be basically completely rewritten/remade
