@@ -11,3 +11,4 @@ lib/
 .clang-format
 build.sh
 compdb.sh
+*.dxbc

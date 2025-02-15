@@ -27,7 +27,7 @@ ql::mesh::mesh(void *vertices, const mdlLoader::mdl_header &hdr)
 
 	// Configure attributes for use with the vertex shader
 	AttrInfo_Init(&attrInfo);
-	for (int i = 0; i < hdr.attrnum; i++)
+	for (unsigned int i = 0; i < hdr.attrnum; i++)
 		AttrInfo_AddLoader(&attrInfo, i, (GPU_FORMATS)hdr.attrtypes[i],
 						   hdr.attrlen[i]);
 
