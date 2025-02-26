@@ -107,8 +107,8 @@ Camera::Camera(GameObject &parent, const void *args) {
 		else
 			iodMapFunc = defaultIODMap;
 		highRes =
-			c.wide && !config::wideIsUnsupported; // disable if not supported
-		if (config::wideIsUnsupported)
+			c.wide && !ql::config::wideIsUnsupported; // disable if not supported
+		if (ql::config::wideIsUnsupported)
 			Console::warn("wide mode not supported");
 		stereo = c.stereo && !c.ortho;
 		if (!target[0])

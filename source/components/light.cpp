@@ -9,7 +9,7 @@
 
 LightLock Light::lock = LightLock();
 
-Light::Light(C3D_FVec color = FVec4_New(0.992, 0.984, 0.827, 1))
+Light::Light(C3D_FVec color)
 	: color(color) {
 	LightLock_Guard l(lock);
 	if (lights::lightenvneedsupdating) {
