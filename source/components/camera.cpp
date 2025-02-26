@@ -191,7 +191,7 @@ namespace ql {
 
 		// set uniforms
 		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_v_loc, &view);
-		C3D_FVUnifSet(GPU_VERTEX_SHADER, ql::shared_unifs::screenparams_loc, FVec4_New(screenwidth, screenheight, display, highRes));
+		C3D_FVUnifSet(GPU_VERTEX_SHADER, ql::shared_unifs::screenparams_loc, screenwidth, screenheight, display, highRes);
 		
 		
 		// per-eye uniforms

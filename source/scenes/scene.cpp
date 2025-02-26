@@ -1,6 +1,5 @@
 #include "scene.h"
 #include "audiosource.h"
-#include "c3d/maths.h"
 #include "camera.h"
 #include "console.h"
 #include <citro3d.h>
@@ -65,7 +64,7 @@ namespace ql {
 	void Scene::draw() {
 	    LightLock_Guard l(lock);
 		
-		C3D_FVUnifSet(GPU_VERTEX_SHADER, shared_unifs::time_loc, FVec4_New(Time::curTime, std::sin(Time::curTime), std::cos(Time::curTime), Time::deltaTime));
+		C3D_FVUnifSet(GPU_VERTEX_SHADER, shared_unifs::time_loc, Time::curTime, std::sin(Time::curTime), std::cos(Time::curTime), Time::deltaTime);
 		reg.view<Camera>().each([](auto &cam) { cam.Render(); });
 	};
 } // namespace ql

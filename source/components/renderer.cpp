@@ -39,7 +39,7 @@ namespace ql {
 	Renderer& Renderer::operator=(Renderer&& other) {
 		rnd = std::move(other.rnd);
 		other.rnd.emplace<DummyRenderer>();
-		layer = other._layer;
+		_layer = other._layer;
 		t = other.t;
 		parent = other.parent;
 		other.parent = nullptr;

@@ -3,12 +3,12 @@
 
 #include "HLSLSupport.cginc"
 
-uniform float4x4 ql_matrix_m    : register(c0);
-uniform float4x4 ql_matrix_im   : register(c4);
-uniform float4x4 ql_matrix_v    : register(c8);
-uniform float4x4 ql_matrix_iv   : register(c12);
-uniform float4x4 ql_matrix_p    : register(c16);
-uniform float4x4 ql_matrix_vp   : register(c20);
+uniform row_major float4x4 ql_matrix_m    : register(c0);
+uniform row_major float4x4 ql_matrix_im   : register(c4);
+uniform row_major float4x4 ql_matrix_v    : register(c8);
+uniform row_major float4x4 ql_matrix_iv   : register(c12);
+uniform row_major float4x4 ql_matrix_p    : register(c16);
+uniform row_major float4x4 ql_matrix_vp   : register(c20);
 
 // first 4 lights
 uniform float4 _LightColor[4]       : register(c24);

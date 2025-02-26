@@ -9,7 +9,7 @@
 #include "stats.h"
 #include "transform.h"
 #include <citro3d.h>
-#include <concepts>
+// #include <concepts>
 #include <string>
 
 namespace ql {
@@ -50,7 +50,7 @@ namespace ql {
 
 		// always will have a transform
 		// safe since pointer isn't stored
-		C3D_Mtx model = *parent->getComponent<transform>();
+		C3D_Mtx model = *parent->getComponent<Transform>();
 		C3D_Mtx out;
 		Mtx_Multiply(&out, &model, &view);
 		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_m_loc, &model);
