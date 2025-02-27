@@ -2,11 +2,15 @@
 #include "componentmanager.h"
 #include <utility>
 
-namespace ql {
-	Light::Light(GameObject &owner, const void *data) {
-		ASSERT(lights::lights_in_use < HW_NUM_LIGHTS, "Too many lights in use");
-		if (lights::lights_in_use >= HW_NUM_LIGHTS)
-			return;
+LightLock Light::lock = LightLock();
+
+Light::Light(C3D_FVec color)
+	: color(color) {
+	LightLock_Guard l(lock);
+	if (lights::lightenvneedsupdating) {
+		C3D_LightEnvInit(&lights::lightenv);
+		C3D_LightEnvBind(&lights::lightenv);
+		lights::lightenvneedsupdating = false;
 	}
 	Light &Light::operator=(ql::Light &&l) {
 		internal_light = std::move(l.internal_light);
