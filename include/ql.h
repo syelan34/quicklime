@@ -14,6 +14,7 @@
 // utility
 #include "util/console.h"
 #include "util/controls.h"
+#include "util/ql_time.h"
 
 // components
 #include "components/componentmanager.h"

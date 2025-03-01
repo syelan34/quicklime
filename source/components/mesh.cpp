@@ -1,10 +1,6 @@
 #include "mesh.h"
-#include "componentmanager.h"
-#include "console.h"
-#include "gameobject.h"
 #include "ql_assert.h"
 #include "stats.h"
-#include <memory>
 
 namespace {
 	u64 permut_from_num_attr(u8 n) {

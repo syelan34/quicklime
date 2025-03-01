@@ -4,9 +4,8 @@
 #include "gameobject.h"
 #include <3ds.h>
 #include <citro3d.h>
-#include <entt.hpp>
+#include <entt/entt.hpp>
 #include <list>
-#include <stdio.h>
 #include <string>
 #include <bullet/btBulletDynamicsCommon.h>
 

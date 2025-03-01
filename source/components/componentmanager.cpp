@@ -1,7 +1,6 @@
 #include "componentmanager.h"
 #include "console.h"
 #include "threads.h"
-#include <iostream>
 
 LightLock ql::ComponentManager::_l = {};
 

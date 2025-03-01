@@ -18,7 +18,8 @@ uniform float4 _LightPosition[4]    : register(c28);
 // y = sin(t)
 // z = cos(t)
 // w = dt
-uniform float4 _Time : register(c29);
+uniform float4 _Time : register(c32);
+uniform float4 _ScreenParams : register(c33);
 
 #define QL_MATRIX_MVP       mul(ql_matrix_vp, ql_matrix_m)r
 #define QL_MATRIX_MV        mul(ql_matrix_v, ql_matrix_m)

@@ -45,18 +45,19 @@ namespace ql {
 #if DEBUG
 		stats::_drawcalls++;
 #endif
+        // set up buffers
 		C3D_SetBufInfo(&meshdata->buf);
 		C3D_SetAttrInfo(&meshdata->attrInfo);
+		
+		
 
 		// always will have a transform
 		// safe since pointer isn't stored
 		C3D_Mtx model = *parent->getComponent<Transform>();
-		C3D_Mtx out;
-		Mtx_Multiply(&out, &model, &view);
+		C3D_Mtx inverse_model = model;
+		Mtx_Inverse(&inverse_model);
 		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_m_loc, &model);
-		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_mv_loc, &out);
-		Mtx_Multiply(&out, &out, &projection);
-		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_mvp_loc, &out);
+		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_im_loc, &inverse_model);
 		
 		// set shader values
 		mat->setMaterial();

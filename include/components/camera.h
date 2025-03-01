@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include <3ds.h>
 #include <citro3d.h>
 #include <utility>
@@ -23,12 +24,12 @@ namespace ql {
 		static bool cameraObjectListDirty;
 		LightLock lock;
 		GameObject *parent;
-		iod_func iodMapFunc = nullptr;
+		iod_func iodMapFunc = [](float iod) { return iod * 0.2f; }; // default iod map function
 		DisplayTarget display;
 		std::vector<std::pair<Renderer *, Transform *>> culledBuckets[3];
 		C3D_Mtx cameraMatrix[2];
 		void updateMatrix(float iod);
-
+		float screenwidth, screenheight;
 	  public:
 		float nearClip, farClip, focalLength = 2.f, fovY, height, width, aspectRatio;
 		bool stereoEnabled, orthographic, highRes, active;

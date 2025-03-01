@@ -3,8 +3,7 @@
 #include "audiolistener.h"
 #include "audiomanager.h"
 #include "componentmanager.h"
-#include "entt.hpp"
-#include "gen_lut.h"
+#include <entt/entt.hpp>
 #include "scene.h"
 #include "ql_assert.h"
 #include "transform.h"

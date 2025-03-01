@@ -9,7 +9,6 @@
 #include <string>
 #include <type_traits>
 #include <unordered_map>
-#include <utility>
 
 namespace ql {
 	template <typename T>

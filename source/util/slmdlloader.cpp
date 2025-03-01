@@ -7,7 +7,6 @@
 
 // #include "bone.h"
 class ql::bone {};
-#include "console.h"
 #include "materialmanager.h"
 #include "mesh.h"
 #include "ql_assert.h"
@@ -78,8 +77,8 @@ namespace ql::mdlLoader {
 			// read header
 			fread(&mdlheader, sizeof(mdl_header), 1, f);
 			// check magic word
-			ASSERT(strncmp(&mdlheader.mdl, "QMDL", 4) == 0, "Error loading model");
-			if (strncmp(&mdlheader.mdl, "QMDL", 4))
+			ASSERT(strncmp(mdlheader.mdl, "QMDL", 4) == 0, "Error loading model");
+			if (strncmp(mdlheader.mdl, "QMDL", 4))
 				goto exit_1;
 
 			void *v = linearMemAlign(mdlheader.numVerts * mdlheader.sv,

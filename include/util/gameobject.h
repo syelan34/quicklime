@@ -115,6 +115,12 @@ namespace ql {
 				parent->removeChild(this);
 			parent = &object;
 		}
+		
+		/**
+         * @brief Enables or disables the GameObject
+         * This causes all logic to skip over it
+         */
+		void setEnabled(bool enabled);
 
 		/**
 		 * @brief Finds an object within the scene.

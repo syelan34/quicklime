@@ -28,6 +28,13 @@ void ql::GameObject::addChild(GameObject &object) {
 	children.push_back(&object);
 }
 
+void ql::GameObject::setEnabled(bool enabled) {
+    LightLock_Guard l(_scriptL);
+    // this->reg.storage<int>()
+    for (auto &s : scripts)
+        s->SetEnabled(enabled);
+}
+
 void ql::GameObject::Awake() {
 	LightLock_Guard l(_scriptL);
 	for (auto &s : scripts) {

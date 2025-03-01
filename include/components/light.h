@@ -1,28 +1,61 @@
 #pragma once
 
-#include "components/pointlight.h"
-#include "shaders/lights.h"
-#include "util/dummylight.h"
-#include "util/ql_assert.h"
-#include <variant>
+#include "lights.h"
 #include <citro3d.h>
 
 namespace ql {
 	class GameObject;
 
 	enum LightType {
-		LightType_NONE,
-		LightType_POINT
+		LightType_POSITIONAL,
+		LightType_DIRECTIONAL,
+	};
+	
+	enum GeoFactorId {
+	    FACTOR0 = BIT(0), 
+		FACTOR1 = BIT(1)
 	};
 
 	class Light {
+	    friend class Camera;
 		GameObject *p;
-		std::variant<DummyLight, PointLight> internal_light;
-		LightType t;
+		// std::variant<DummyLight, PointLight, DirectionalLight> internal_light;
+		// LightType t;
+		
+		lights::light_id id;
+		u32 flags;
+		C3D_FVec position, color;
+		
+		/*
+		Shared attribs:
+		- light id
+		- enabled
+		- geo factor
+		- two side diffuse
+		- position
+		- color
+		- shadow enable
+		- distance attenuation
+		- distance attenuation lut
+	    */
+		
+		void setSelf(C3D_Mtx &modelView);
 
 	  public:
 		Light(GameObject &owner, const void *data);
 		Light &operator=(Light &&);
-		void setSelf(C3D_Mtx &modelView);
+		~Light();
+		void setPosition(C3D_FVec& position);
+		void setEnabled(bool enabled);
+		void setGeoFactorEnable(bool enabled, GeoFactorId id);
+		void set2SideDiffuseEnable(bool enabled);
+		void setShadowEnabled(bool enabled);
+		void setDistAttenEnabled(bool enabled);
+		void setDirectional(LightType);
+		void setDistAttenLut(C3D_LightLutFuncDA func);
+		void setSpotlightEnabled(bool enabled);
+		void setSpotlightLut(C3D_LightLutFunc func);
+		void setSpotlightAngle(float angle);
+		void setSpotlightDirection(C3D_FVec& direction);
 	};
 } // namespace ql

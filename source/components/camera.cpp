@@ -1,7 +1,4 @@
 #include "camera.h"
-#include "c3d/maths.h"
-#include "c3d/types.h"
-#include "c3d/uniforms.h"
 #include "componentmanager.h"
 #include "config.h"
 #include "gameobject.h"
@@ -142,6 +139,17 @@ namespace ql {
 		orthographic	 = c.ortho;
 		fovY			 = c.fovY;
 		iodMapFunc		 = defaultIodMapFunc;
+		
+		switch (display) {
+    		case DISPLAY_TOP:
+                screenwidth  = 400;
+                screenheight = 240;
+                break;
+			case DISPLAY_BOTTOM:
+			    screenwidth  = 320;
+				screenheight = 240;
+				break;
+		}
 	}
 
 	Camera::~Camera() {}
@@ -152,8 +160,11 @@ namespace ql {
 
 		float iod  = iodMapFunc(osGet3DSliderState());
 		bool use3D = stereoEnabled && (iod != 0);
-		gfxSet3D(use3D);
-		gfxSetWide(highRes);
+		gfxSetWide(highRes && display == DISPLAY_TOP && !use3D);
+		gfxSet3D(use3D && display == DISPLAY_TOP);
+		
+		if (use3D) screenwidth = 400;
+		if (highRes) screenwidth = 800;
 
 		target_clear(display, highRes, use3D, backgroundColour);
 		updateMatrix(iod);
@@ -177,6 +188,7 @@ namespace ql {
 		ASSERT(t != nullptr, "No transform component");
 		C3D_FVec position = t->position;
 		C3D_Mtx view	  = *t;
+		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_iv_loc, &view);
 		Mtx_Inverse(&view);
 		C3D_Mtx viewProj[2];
 		Mtx_Multiply(&viewProj[0], &cameraMatrix[0], &view);
@@ -185,8 +197,8 @@ namespace ql {
 		sortObjects(culledBuckets, position);
 
 		// set lights
-		C3D_LightEnvBind(&lights::shared_lightenv);
-
+		// C3D_LightEnvBind(&lights::shared_lightenv);
+		lights::set_lightenv();
 		parent->s.reg.view<Light>().each([&](auto &light) { light.setSelf(view); });
 
 		// set uniforms
