@@ -14,9 +14,6 @@ bool ql::ComponentManager::addComponent(const char *name, GameObject &obj,
 			Console::log("%s: %p", elem.first.c_str(), elem.second);
 		return false;
 	}
-	Console::error("Known components:");
-	for(const auto& elem : getComponentMap())
-		Console::log("%s: %p", elem.first.c_str(), elem.second);
 	getComponentMap()[name](obj, data);
 	return true;
 }

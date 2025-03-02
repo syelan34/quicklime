@@ -66,6 +66,6 @@ namespace ql {
 	};
 } // namespace ql
 
-#define COMPONENT_REGISTER(component)                                          \
-	__attribute__((weak)) bool component##_component =         \
+#define COMPONENT_REGISTER(component) \
+	__attribute__((weak)) bool component##_component = \
 		::ql::ComponentManager::registerComponent<component>(#component);

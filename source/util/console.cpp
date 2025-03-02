@@ -110,8 +110,7 @@ namespace ql {
 
 		base[5] = loglevel; // silly hack that works bc the loglevel enum
 
-		base[vsnprintf(base + 7, 40, text, args) + 7] =
-			' '; // add text after formatting
+		base[vsnprintf(base + 7, 40, text, args) + 7] = ' '; // add text after formatting
 
 		if (line >= CONSOLE_NUM_LINES - 2) {
 			for (int i = 0; i < CONSOLE_NUM_LINES - 1; i++)
@@ -131,9 +130,7 @@ namespace ql {
 	void Console::log(const char *text, ...) { LOG(LOG_LEVEL_LOW, text); };
 	void Console::warn(const char *text, ...) { LOG(LOG_LEVEL_WARN, text); };
 	void Console::error(const char *text, ...) { LOG(LOG_LEVEL_ERROR, text); };
-	void Console::success(const char *text, ...) {
-		LOG(LOG_LEVEL_SUCCESS, text);
-	};
+	void Console::success(const char *text, ...) { LOG(LOG_LEVEL_SUCCESS, text); };
 
 	void Console::update() {
 #if CONSOLE
@@ -154,9 +151,9 @@ namespace ql {
 				   SCN_X, SceneManager::currentScene->name.c_str());
 			printf("\e[s\e[%u;%uHHeap Usage: %u KiB         \e[u", MEM_Y, MEM_X,
 				   mallinfo().uordblks / 1024);
-			printf("\e[s\e[%u;%uHLinear RAM Free: %lu KiB         \e[u",
+			printf("\e[s\e[%u;%uHLinear RAM Free: %u KiB         \e[u",
 				   MEM_Y + 1, MEM_X, linearSpaceFree() / 1024);
-			printf("\e[s\e[%u;%uHVRAM Free: %lu KiB         \e[u", MEM_Y + 2,
+			printf("\e[s\e[%u;%uHVRAM Free: %u KiB         \e[u", MEM_Y + 2,
 				   MEM_X, vramSpaceFree() / 1024);
 			printf("\e[s\e[%u;%uHVertices: %u\e[u", NV_Y, NV_X,
 				   stats::_vertices);
