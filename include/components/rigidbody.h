@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bullet/btBulletDynamicsCommon.h>
 
 namespace ql {
     class GameObject;
