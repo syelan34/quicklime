@@ -1,7 +1,7 @@
 #pragma once
 
 #include "util/gameobject.h"
-#include <entt/entt.hpp>
+#include <external/entt/entt.hpp>
 #include <string>
 
 namespace ql {

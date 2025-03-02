@@ -2,6 +2,16 @@
 #include "componentmanager.h"
 
 namespace ql {
+    namespace {
+        struct rigidbody_args {
+            float mass;
+            float drag;
+            float angulardrag;
+            bool automasscenter;
+            bool usegravity;
+            bool iskinematic;
+        };
+    }
     RigidBody::RigidBody(GameObject& parent, const void* data): parent(&parent) {
         mass = 1;
         drag = 0;

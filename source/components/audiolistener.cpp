@@ -11,6 +11,6 @@ namespace ql {
 		static int n = 0;
 		n = n + n;
 	}
-
+	
 	COMPONENT_REGISTER(Listener);
 } // namespace ql

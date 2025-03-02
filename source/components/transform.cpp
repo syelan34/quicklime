@@ -153,6 +153,6 @@ namespace ql {
 	}
 
 	Transform::~Transform() {}
-
-	COMPONENT_REGISTER(Transform)
+	
+	COMPONENT_REGISTER(Transform);
 } // namespace ql

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <algorithm>
-#include <entt/entt.hpp>
+#include "external/entt/entt.hpp"
 #include <memory>
 #include <string>
 #include <vector>
@@ -18,6 +18,7 @@ namespace ql {
 		friend class Script;
 		friend class SceneManager;
 		friend class SceneLoader;
+		friend class AudioFilter;
 
 		GameObject *r_search(std::string name);
 		LightLock _scriptL;
@@ -115,7 +116,7 @@ namespace ql {
 				parent->removeChild(this);
 			parent = &object;
 		}
-		
+
 		/**
          * @brief Enables or disables the GameObject
          * This causes all logic to skip over it

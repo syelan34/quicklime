@@ -9,7 +9,8 @@ MAKE="make"
 
 [ -f /proc/cpuinfo ] && MAKE="make -j$(grep -c ^processor /proc/cpuinfo)" || echo "No /proc/cpuinfo found, using single-threaded build" && $MAKE
 
-cp build/compile_commands.json "$COMPILE_COMMANDS"
+cp build/compile_commands.json "$COMPILE_COMMANDS" || echo "Could not find compile_commands.json file"
+cp build/compile_commands.part "$COMPILE_COMMANDS" && echo "]" >> "$COMPILE_COMMANDS" || echo "Could not find compile_commands.part file"
 
 #sed -z 's/\n\]\n\[/,/g' -i "$COMPILE_COMMANDS"
 

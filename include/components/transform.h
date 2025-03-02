@@ -73,4 +73,5 @@ namespace ql {
 
 		operator C3D_Mtx() const;
 	};
+	
 } // namespace ql

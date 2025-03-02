@@ -3,12 +3,12 @@
 #include "audiolistener.h"
 #include "audiomanager.h"
 #include "componentmanager.h"
-#include <entt/entt.hpp>
+#include <external/entt/entt.hpp>
 #include "scene.h"
 #include "ql_assert.h"
 #include "transform.h"
 #include <3ds.h>
-#include <algorithm>
+// #include <algorithm>
 #include <citro3d.h>
 #include <cmath>
 

@@ -4,7 +4,7 @@
 #include "components/script.h"
 #include "util/console.h"
 #include <3ds.h>
-#include <entt/entt.hpp>
+#include <external/entt/entt.hpp>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -28,16 +28,16 @@ namespace ql {
 		}
 
 	  public:
-		template <typename T>
-			requires validcomponent<T>
-		static bool registerComponent(const char *name) {
-			Console::log(name);
-			if constexpr (std::is_base_of_v<Script, T>)
-				getScriptMap()[name] = ComponentManager::attachScript<T>;
-			else
-				getComponentMap()[name] = ComponentManager::attachComponent<T>;
-			return true;
-		}
+        template <typename T>
+            requires validcomponent<T>
+        static bool registerComponent(const char *name) {
+            Console::log(name);
+        if constexpr (std::is_base_of_v<Script, T>)
+            getScriptMap()[name] = ComponentManager::attachScript<T>;
+        else
+            getComponentMap()[name] = ComponentManager::attachComponent<T>;
+       	return true;
+        }
 
 		static inline bool init() {
 			LightLock_Init(&_l);
@@ -67,5 +67,5 @@ namespace ql {
 } // namespace ql
 
 #define COMPONENT_REGISTER(component)                                          \
-	static volatile bool component##_component =                                               \
+	__attribute__((weak)) bool component##_component =         \
 		::ql::ComponentManager::registerComponent<component>(#component);

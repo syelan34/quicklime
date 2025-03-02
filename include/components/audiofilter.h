@@ -1,6 +1,7 @@
 #pragma once
 
 #include "audio/audiomanager.h"
+
 namespace ql {
 	enum FilterType {
 		FILTER_HIGHPASS,

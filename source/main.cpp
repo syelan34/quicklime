@@ -2,9 +2,7 @@
 #include <citro2d.h>
 #include <citro3d.h>
 
-#include "physics.h"
 #include "sceneloader.h"
-
 #include "audiomanager.h"
 #include "componentmanager.h"
 #include "console.h"
@@ -44,7 +42,7 @@ namespace {
 		ql::Console::init();
 		ql::ComponentManager::init();
 		ql::AudioManager::init();
-		ql::physicsInit(21887825); // 20ms tick speed (approximately)
+		// ql::physicsInit(21887825); // 20ms tick speed (approximately)
 		// ql::physicsInit(54719563); // 50ms tick speed
 		// ql::physicsInit(20.f);
 
@@ -63,13 +61,15 @@ namespace {
 		C3D_FrameEnd(GX_CMDLIST_FLUSH);
 	}
 	void prgrmexit() {
-		ql::physicsExit();
+		// ql::physicsExit();
 		gfxExit();
 		C3D_Fini();
 		ndspExit();
 		romfsExit();
 	}
 } // namespace
+
+
 
 int main() {
 	prgrminit();
