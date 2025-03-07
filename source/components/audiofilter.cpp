@@ -2,6 +2,7 @@
 #include "componentmanager.h"
 #include "audiolistener.h"
 #include "defines.h"
+#include "ql_assert.h"
 
 namespace ql {
 	void applyFilter(FilterType t, ndsp_channel c, bool biquad) {
@@ -23,18 +24,20 @@ namespace ql {
         };
     }
 
-	AudioFilter::AudioFilter(GameObject &obj, const void *data) {
+	AudioFilter::AudioFilter(std::weak_ptr<GameObject> obj, const void *data) {
 	    (void)data;
-        p = &obj;
+        p = obj;
         t = FILTER_LOWPASS;
         onListener = false;
-        if (p->getComponent<Listener>() != nullptr)
+        ASSERT(!p.expired(), "Parent expired");
+        if (p.lock()->getComponent<Listener>() != nullptr)
             onListener = true;
 	}
 
 	// apply filter
 	void AudioFilter::apply(ndsp_channel channel) {
-	    if (p->getComponent<Listener>() != nullptr)
+	    ASSERT(!p.expired(), "Parent expired");
+	    if (p.lock()->getComponent<Listener>() != nullptr)
             onListener = true;
 		switch (channel) {
 		case -1: // all channels

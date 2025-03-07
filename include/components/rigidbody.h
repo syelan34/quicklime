@@ -1,10 +1,10 @@
 #pragma once
 
-
+#include <memory>
 namespace ql {
     class GameObject;
 	class RigidBody {
-	    GameObject* parent;
+	    std::weak_ptr<GameObject> parent;
 		float mass;
 		float drag;
 		float angulardrag;
@@ -12,7 +12,7 @@ namespace ql {
 		bool usegravity;
 		bool iskinematic;
 		public:
-		RigidBody(GameObject& parent, const void* data);
+		RigidBody(std::weak_ptr<GameObject> parent, const void* data);
 		RigidBody(RigidBody& other);
 		RigidBody(RigidBody&& other);
 		RigidBody& operator=(RigidBody& other);

@@ -119,13 +119,13 @@ namespace ql {
 
 	bool Camera::cameraObjectListDirty = true;
 
-	Camera::Camera(GameObject &owner, const void *args) {
+	Camera::Camera(std::weak_ptr<GameObject> owner, const void *args) {
 		ASSERT(args != nullptr, "Invalid camera constructor arg");
 		target_init();
 		cam_args c;
 		if (args)
 			c = *(cam_args *)args;
-		parent			 = &owner;
+		parent			 = owner;
 		active			 = c.active;
 		stereoEnabled	 = c.stereo;
 		highRes			 = c.wide & !stereoEnabled & !config::wideIsUnsupported;
@@ -157,6 +157,9 @@ namespace ql {
 	void Camera::Render() {
 		if (!active)
 			return;
+			
+		ASSERT(!parent.expired(), "Parent expired");
+		auto p = parent.lock();
 
 		float iod  = iodMapFunc(osGet3DSliderState());
 		bool use3D = stereoEnabled && (iod != 0);
@@ -174,7 +177,7 @@ namespace ql {
 			cameraObjectListDirty = false;
 			for (auto &bucket : culledBuckets)
 				bucket.clear();
-			parent->s
+			p->s
 				.reg
 				.view<Renderer, Transform>()
 				.each(
@@ -184,7 +187,7 @@ namespace ql {
 					});
 		}
 		// sort
-		auto *t	  = parent->getComponent<Transform>();
+		auto *t	  = p->getComponent<Transform>();
 		ASSERT(t != nullptr, "No transform component");
 		C3D_FVec position = t->position;
 		C3D_Mtx view	  = *t;
@@ -199,7 +202,7 @@ namespace ql {
 		// set lights
 		// C3D_LightEnvBind(&lights::shared_lightenv);
 		lights::set_lightenv();
-		parent->s.reg.view<Light>().each([&](auto &light) { light.setSelf(view); });
+		p->s.reg.view<Light>().each([&](auto &light) { light.setSelf(view); });
 
 		// set uniforms
 		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_v_loc, &view);

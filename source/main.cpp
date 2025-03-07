@@ -35,13 +35,13 @@ namespace {
 #if CONSOLE
 		consoleInit(GFX_BOTTOM, NULL);
 #endif
-		ndspInit();
 		romfsInit();
-		osSetSpeedupEnable(true);
-		ql::controls::init();
+		osSetSpeedupEnable(true); // run way faster on n3ds
 		ql::Console::init();
+		ql::controls::init();
 		ql::ComponentManager::init();
 		ql::AudioManager::init();
+		svcSetThreadPriority(CUR_THREAD_HANDLE, MAIN_THREAD_PRIORITY);
 		// ql::physicsInit(21887825); // 20ms tick speed (approximately)
 		// ql::physicsInit(54719563); // 50ms tick speed
 		// ql::physicsInit(20.f);
@@ -49,7 +49,6 @@ namespace {
 		ql::SceneLoader::load(ql::scenename);
 	}
 	void update() {
-		ql::controls::update();
 		ql::SceneManager::update();
 		ql::Console::update();
 		ql::Time::Update();
@@ -62,6 +61,7 @@ namespace {
 	}
 	void prgrmexit() {
 		// ql::physicsExit();
+		ql::controls::exit();
 		gfxExit();
 		C3D_Fini();
 		ndspExit();

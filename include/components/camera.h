@@ -3,6 +3,7 @@
 
 #include <3ds.h>
 #include <citro3d.h>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -23,7 +24,7 @@ namespace ql {
 	  private:
 		static bool cameraObjectListDirty;
 		LightLock lock;
-		GameObject *parent;
+		std::weak_ptr<GameObject> parent;
 		iod_func iodMapFunc = [](float iod) { return iod * 0.2f; }; // default iod map function
 		DisplayTarget display;
 		std::vector<std::pair<Renderer *, Transform *>> culledBuckets[3];
@@ -34,7 +35,7 @@ namespace ql {
 		float nearClip, farClip, focalLength = 2.f, fovY, height, width, aspectRatio;
 		bool stereoEnabled, orthographic, highRes, active;
 		uint32_t backgroundColour, cullingMask;
-		Camera(GameObject &parent, const void *args);
+		Camera(std::weak_ptr<GameObject> parent, const void *args);
 		~Camera();
 		void Render();
 		void setActive(bool active);

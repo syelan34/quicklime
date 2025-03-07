@@ -1,6 +1,7 @@
 #pragma once
 
 #include "audio/audiomanager.h"
+#include <memory>
 
 namespace ql {
 	enum FilterType {
@@ -13,12 +14,12 @@ namespace ql {
 	class GameObject;
 
 	class AudioFilter {
-		GameObject *p;
+		std::weak_ptr<GameObject> p;
 		FilterType t;
 		bool onListener;
 
 	  public:
-		AudioFilter(GameObject &owner, const void *data);
+		AudioFilter(std::weak_ptr<GameObject> owner, const void *data);
 		void apply(ndsp_channel channel = -1);
 		void disable(ndsp_channel channel = -1);
 	};

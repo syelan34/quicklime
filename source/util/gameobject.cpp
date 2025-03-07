@@ -2,204 +2,74 @@
 #include <3ds.h>
 #include "console.h"
 #include "scene.h"
-#include "script.h"
-#include "threads.h"
 #include "camera.h"
-#include <sstream>
 
 ql::GameObject::GameObject(std::string name, Scene &s)
-	: s(s), reg(s.reg), id(s.reg.create()), name(name) {
-	LightLock_Init(&_scriptL);
+	: s(s), id(s.reg.create()), name(name) {
 	Camera::cameraObjectListDirty = true;
 }
 
+ql::GameObject::GameObject(GameObject &other): s(other.s), children(other.children), id(other.id), name(other.name) {}
+
 ql::GameObject::GameObject(GameObject &&other)
-	: _scriptL(other._scriptL), s(other.s), children(other.children),
-	  scripts(std::move(other.scripts)), parent(other.parent), reg(other.reg),
+	: s(other.s), children(std::move(other.children)), 
+	  parent(other.parent),
 	  id(other.id), name(other.name) {
-	other.parent = nullptr;
+	other.parent = {};
 	other.id	 = entt::entity{entt::null};
-	other.scripts.clear();
 	other.children.clear();
 }
 
-void ql::GameObject::addChild(GameObject &object) {
-	object.setParent(*this);
-	children.push_back(&object);
-}
 
-void ql::GameObject::setEnabled(bool enabled) {
-    LightLock_Guard l(_scriptL);
-    // this->reg.storage<int>()
-    for (auto &s : scripts)
-        s->SetEnabled(enabled);
-}
 
-void ql::GameObject::Awake() {
-	LightLock_Guard l(_scriptL);
-	for (auto &s : scripts) {
-		s->Awake();
-		s->SetEnabled(true);
-	}
-}
-void ql::GameObject::Start() {
-	LightLock_Guard l(_scriptL);
-	for (auto &s : scripts)
-		if (s->enabled)
-			s->Start();
-}
-void ql::GameObject::Update() {
-	LightLock_Guard l(_scriptL);
-	for (auto &s : scripts)
-		if (s->enabled)
-			s->Update();
-}
-void ql::GameObject::LateUpdate() {
-	LightLock_Guard l(_scriptL);
-	for (auto &s : scripts)
-		if (s->enabled)
-			s->LateUpdate();
-}
-void ql::GameObject::FixedUpdate() {
-	LightLock_Guard l(_scriptL);
-	for (auto &s : scripts)
-		if (s->enabled)
-			s->FixedUpdate();
-}
-void ql::GameObject::OnCollisionEnter(void) {
-    LightLock_Guard l(_scriptL);
-    for (auto &s : scripts)
-        if (s->enabled)
-            s->OnCollisionEnter();
-};
-void ql::GameObject::OnCollisionStay(void) {
-    LightLock_Guard l(_scriptL);
-    for (auto &s : scripts)
-        if (s->enabled)
-            s->OnCollisionStay();
-};
-void ql::GameObject::OnCollisionExit(void) {
-    LightLock_Guard l(_scriptL);
-    for (auto &s : scripts)
-        if (s->enabled)
-            s->OnCollisionExit();
-};
-void ql::GameObject::OnTriggerEnter(void) {
-    LightLock_Guard l(_scriptL);
-    for (auto &s : scripts)
-        if (s->enabled)
-            s->OnTriggerEnter();
-};
-void ql::GameObject::OnTriggerStay(void) {
-    LightLock_Guard l(_scriptL);
-    for (auto &s : scripts)
-        if (s->enabled)
-            s->OnTriggerStay();
-};
-void ql::GameObject::OnTriggerExit(void) {
-    LightLock_Guard l(_scriptL);
-    for (auto &s : scripts)
-        if (s->enabled)
-            s->OnTriggerExit();
-};
-
-ql::GameObject *ql::GameObject::r_search(std::string name) {
-	GameObject *out = NULL;
-	for (GameObject *child : children) {
+std::weak_ptr<ql::GameObject> ql::GameObject::r_search(std::string name) {
+	std::weak_ptr<ql::GameObject> out;
+	for (auto child : children) {
 		if (child->name == name)
 			return child;
 		out = child->r_search(name);
-		if (out)
+		if (!out.expired())
 			return out;
 	}
 	return out;
 }
 
-ql::GameObject *ql::GameObject::find(std::string name) {
-	/**
-	 *     in front of name will search top down
-	 * /   in front of name will only search root (then find children based on
-	 * '/' "subdirectories")
-	 * ./  in front of name will only search children
-	 * ../ in front of name will only search children of parent (do ../../ to
-	 * get level above etc)
-	 */
-	if (name[0] == '.') {
-		if (name[1] == '.') {
-			if (name[2] == '/') { // find in parent's children
-				if (parent) {
-					/**
-					 * Go back one level by telling parent to search its
-					 * children change beginning to './' and tell parent to find
-					 * it
-					 */
-					return parent->find(name.substr(1));
-				} else
-					Console::warn("Object %s not found");
-				return nullptr;
+std::weak_ptr<ql::GameObject> ql::GameObject::find(std::string_view name) {
+	switch (name[0]) {
+	    case '.':
+			switch (name[1]) {
+			    case '.': // case ../obj -> get parent and search its children
+					if (!parent.expired()) return parent.lock()->find(name.substr(1));
+					else Console::warn("Object %s not found", name.data());
+					return {}; 
+			    case '/':
+					return find(name.substr(2));
 			}
-		} else if (name[1] == '/') // find in own children
-		{ 
-			std::stringstream ss;
-			ss << name.substr(2); // remove the './'
-			std::string subname;
-			GameObject *out = this; // start at current spot
-
-			while (std::getline(ss, subname, '/') && out) { // for each level
-				GameObject *temp = out;
-				for (GameObject *obj : out->children) {
-					if (obj->name == subname) {
-						out = obj;
-						break;
-					}
-				}
-				if (temp == out)
-					return nullptr; // if a child was not found in one level, it
-									// was not found so return nothing
-			}
-
-			return out;
+			break;
+		case '/': {
+            // get root and start from there
+            auto root = std::weak_ptr(s.root);
+            return root.lock()->find(name.substr(1));
 		}
-	} else if (name[0] == '/') // find at root
-	{
-		GameObject *root = this;
-		while (root->parent)
-			root = root->parent;
-
-		return root->find(name.substr(1));
-	} else // find anywhere
-	{
-		GameObject *root = this;
-		while (root->parent)
-			root = root->parent; // get root of all objects (that way we don't
-								 // need to store this at all times)
-
-		int i		  = 0;
-		bool hasChild = false;
-
-		while (name[i] != 0) {
-			if (name[i] == '/') {
-				hasChild = true;
-				break;
-			}
-			i++;
-		}
-
-		root = root->r_search(
-			name.substr(0, i)); // recursively search for the first item
-
-		if (root && hasChild)
-			root = root->find("./" + name.substr(i));
-
-		return root;
+		default: // obj/obj2 is the same as ./obj/obj2
+		    size_t slashpos = name.find_first_of('/');
+		    auto subname = name.substr(0, slashpos);
+            for (auto& obj : this->children) 
+                if (obj->name == subname) return obj->find(name.substr(slashpos+1));
 	}
-	return nullptr;
+	return {};
 };
 
+void ql::GameObject::assignChild(std::shared_ptr<GameObject> &object) {
+    children.push_back(std::move(object));
+}
+
+void ql::GameObject::assignChild(std::shared_ptr<GameObject> &&object) {
+    children.push_back(std::move(object));
+}
+
 ql::GameObject::~GameObject() {
-	if (parent)
-		parent->removeChild(this);
 	if (id != entt::null)
-		reg.destroy(id);
+		s.reg.destroy(id);
 	Camera::cameraObjectListDirty = true;
 }

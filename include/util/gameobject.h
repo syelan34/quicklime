@@ -1,14 +1,13 @@
 #pragma once
 
-#include <algorithm>
 #include "external/entt/entt.hpp"
 #include <memory>
 #include <string>
 #include <vector>
 #include <3ds.h>
+#include "scenes/scene.h"
 
 namespace ql {
-	class Scene;
 	class Script;
 
 	class GameObject {
@@ -19,37 +18,19 @@ namespace ql {
 		friend class SceneManager;
 		friend class SceneLoader;
 		friend class AudioFilter;
-
-		GameObject *r_search(std::string name);
-		LightLock _scriptL;
 		Scene &s;
-		std::vector<GameObject *> children; // non owning, only viewer
-		// cannot be component since you can't have more than 1 object of type
-		// per entity
-		std::vector<std::unique_ptr<Script>> scripts;
-		GameObject *parent = NULL;
-		entt::registry &reg;
+		std::vector<std::shared_ptr<GameObject>> children;
+		std::weak_ptr<GameObject> parent;
 		entt::entity id;
-		const std::string name; // saved in scene file
+		std::string name; // saved in scene file
 
+		std::weak_ptr<GameObject> r_search(std::string name);
 	  public:
 		GameObject(std::string name, Scene &s);
+		GameObject(GameObject &other);
 		GameObject(GameObject &&other);
 
 		operator entt::entity() { return id; }
-
-		// message passthrough
-		void Awake(void);
-		void Start(void);
-		void Update(void);
-		void FixedUpdate(void);
-		void LateUpdate(void);
-		void OnCollisionEnter(void);
-		void OnCollisionStay(void);
-		void OnCollisionExit(void);
-		void OnTriggerEnter(void);
-		void OnTriggerStay(void);
-		void OnTriggerExit(void);
 
 		/**
 		 * @brief Adds a component to GameObject at runtime. If the GameObject
@@ -61,8 +42,8 @@ namespace ql {
 		 * @param args Arguments to pass to the component constructor
 		 */
 		template <typename T, typename... Args>
-		inline void addComponent(Args &&...args) {
-			reg.emplace_or_replace<T>(id, std::forward<Args>(args)...);
+		void addComponent(Args &&...args) {
+			s.reg.emplace_or_replace<T>(id, std::forward<Args>(args)...);
 		}
 
 		/**
@@ -71,51 +52,23 @@ namespace ql {
 		 * @tparam T Component to get
 		 * @return T* Pointer to the component instance
 		 */
-		template <typename T> inline T *getComponent() {
-			return reg.try_get<T>(id);
+		template <typename T> T *getComponent() {
+			return s.reg.try_get<T>(id);
 		}
 
 		/**
 		 * @brief Adds child to self
 		 *
-		 * @param object Reference to GameObject to add as child
+		 * @param object Reference to GameObject to take ownership of as child
 		 */
-		void addChild(GameObject &object);
-
+		void assignChild(std::shared_ptr<GameObject> &object);
+		
 		/**
-		 * @brief Removes object from list of children
+		 * @brief Adds child to self
 		 *
-		 * @param object GameObject to remove
+		 * @param object GameObject to take ownership of as child
 		 */
-		inline void removeChild(GameObject &object) {
-			children.erase(
-				std::remove(children.begin(), children.end(), &object),
-				children.end());
-			// children.remove(&object);
-			object.parent = nullptr;
-		}
-
-		/**
-		 * @brief Removes object from list of children
-		 *
-		 * @param object GameObject to remove
-		 */
-		inline void removeChild(GameObject *object) {
-			if (!object)
-				return;
-			// if (children.front() == children.end()) return;
-			children.erase(
-				std::remove(children.begin(), children.end(), object),
-				children.end());
-			// children.remove(object);
-			object->parent = nullptr;
-		}
-
-		inline void setParent(GameObject &object) {
-			if (parent)
-				parent->removeChild(this);
-			parent = &object;
-		}
+		void assignChild(std::shared_ptr<GameObject> &&object);
 
 		/**
          * @brief Enables or disables the GameObject
@@ -130,19 +83,16 @@ namespace ql {
 		 * Start() function of a script (do NOT use it every frame). Instead,
 		 * store the pointer in a variable and reuse it in the future.
 		 *
+		 * - ` `  in front of name will search from self
+		 * - `/`   in front of name will search from root (then find children based on '/' "subdirectories")
+		 * - `./`  in front of name will search from self
+		 * - `../` in front of name will search from parent (do ../../ to get level above etc)
+		 * - All of this assumes no two sibling objects have the same name
 		 *
-		 * " "   in front of name will search top down.
-		 * "/"   in front of name will only search root (then find children
-		 * based on
-		 * '/' "subdirectories").
-		 * "./"  in front of name will only search children.
-		 * "../" in front of name will only search children of parent (do ../../
-		 * to get level above etc).
-		 *
-		 * @param name The name of the GameObject to search for
-		 * @return A pointer to the found GameObject, or null if not found
+		 * @param path The path of the GameObject to search for
+		 * @return A weak pointer to the found GameObject, or empty if not found
 		 */
-		GameObject *find(std::string name);
+		std::weak_ptr<GameObject> find(std::string_view path);
 
 		~GameObject();
 	};

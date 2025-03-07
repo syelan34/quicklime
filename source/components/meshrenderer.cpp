@@ -24,7 +24,7 @@ namespace ql {
 		};
 	} // namespace
 
-	MeshRenderer::MeshRenderer(GameObject &obj, const void *data) : parent(&obj) { // parent will never be null
+	MeshRenderer::MeshRenderer(std::weak_ptr<GameObject> obj, const void *data) : parent(obj) { // parent will never be null
 		ASSERT(data != nullptr, "Mesh parameter was null");
 		meshrenderer_args &args = *(meshrenderer_args *)data;
 		std::string meshpath	= &args.data;
@@ -42,6 +42,7 @@ namespace ql {
 	}
 
 	void MeshRenderer::render(C3D_Mtx &view, C3D_Mtx &projection) {
+        ASSERT(!parent.expired(), "Mesh renderer parent reference expired");
 #if DEBUG
 		stats::_drawcalls++;
 #endif
@@ -53,7 +54,7 @@ namespace ql {
 
 		// always will have a transform
 		// safe since pointer isn't stored
-		C3D_Mtx model = *parent->getComponent<Transform>();
+		C3D_Mtx model = *parent.lock()->getComponent<Transform>();
 		C3D_Mtx inverse_model = model;
 		Mtx_Inverse(&inverse_model);
 		C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, ql::shared_unifs::matrix_m_loc, &model);
@@ -85,7 +86,7 @@ namespace ql {
 	}
 
 	MeshRenderer::MeshRenderer(MeshRenderer &&other) : meshdata(std::move(other.meshdata)), mat(std::move(other.mat)), parent(other.parent) {
-		other.parent = nullptr;
+		other.parent = {};
 	}
 
 	std::shared_ptr<shader> MeshRenderer::material() const {

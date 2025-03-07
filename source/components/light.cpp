@@ -25,7 +25,7 @@ namespace ql {
         //     return 1.0f / (1.0f + linear * d + quadratic * d * d);
         // }
     }
-    Light::Light(GameObject &owner, const void *data) : p(&owner) {
+    Light::Light(std::weak_ptr<GameObject> owner, const void *data) : p(owner) {
         ASSERT(data != nullptr, "Invalid light constructor arg");
         
         light_args &args = *(light_args *)data;
@@ -37,7 +37,7 @@ namespace ql {
     }
 	Light &Light::operator=(ql::Light &&l) {
 		p	= l.p;
-		l.p = nullptr;
+		l.p = {};
 		id = l.id;
 		l.id = UINT_MAX;
 		return *this;
@@ -48,7 +48,8 @@ namespace ql {
 	}
 
 	void Light::setSelf(C3D_Mtx &view) {
-	    C3D_Mtx model = *p->getComponent<Transform>();
+	    ASSERT(!p.expired(), "Parent expired");
+	    C3D_Mtx model = *p.lock()->getComponent<Transform>();
 		C3D_Mtx modelView;
 		Mtx_Multiply(&modelView, &model, &view);
 		

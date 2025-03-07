@@ -22,10 +22,10 @@ namespace ql {
 		std::variant<DummyRenderer, MeshRenderer> rnd;
 		RendererType t;
 		uint32_t _layer = 1; // by default on base layer (layer 1)
-		GameObject *parent;
+		std::weak_ptr<GameObject> parent;
 
 	  public:
-		Renderer(GameObject &obj, const void *data);
+		Renderer(std::weak_ptr<GameObject> obj, const void *data);
 		void render(C3D_Mtx &view, C3D_Mtx& projection);
 		RenderQueue queue() const;
 		uint32_t layer() const { return _layer; }

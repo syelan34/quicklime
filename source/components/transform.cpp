@@ -7,7 +7,7 @@ namespace ql {
 	Transform::Transform()
 		: _position({{1, 0, 0, 0}}), _rotation({{1, 0, 0, 0}}),
 		  _scale({{1, 1, 1, 1}}){};
-	Transform::Transform(GameObject &parent, const void *data)
+	Transform::Transform(std::weak_ptr<GameObject> parent, const void *data)
 		: _position({{1, 0, 0, 0}}), _rotation({{1, 0, 0, 0}}),
 		  _scale({{1, 1, 1, 1}}) {
 		if (data) {

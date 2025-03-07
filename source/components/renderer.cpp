@@ -11,7 +11,7 @@ namespace ql {
 		};
 	} // namespace
 
-	Renderer::Renderer(GameObject &obj, const void *data) : parent(&obj) {
+	Renderer::Renderer(std::weak_ptr<GameObject> obj, const void *data) : parent(obj) {
 		if (!data)
 			return;
 		const renderer_args& args = *static_cast<const renderer_args *>(data);
@@ -42,7 +42,7 @@ namespace ql {
 		_layer = other._layer;
 		t = other.t;
 		parent = other.parent;
-		other.parent = nullptr;
+		other.parent = {};
 		return *this;
 	}
 

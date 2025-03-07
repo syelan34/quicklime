@@ -2,6 +2,7 @@
 
 #include "lights.h"
 #include <citro3d.h>
+#include <memory>
 
 namespace ql {
 	class GameObject;
@@ -18,7 +19,7 @@ namespace ql {
 
 	class Light {
 	    friend class Camera;
-		GameObject *p;
+		std::weak_ptr<GameObject> p;
 		// std::variant<DummyLight, PointLight, DirectionalLight> internal_light;
 		// LightType t;
 		
@@ -42,7 +43,7 @@ namespace ql {
 		void setSelf(C3D_Mtx &modelView);
 
 	  public:
-		Light(GameObject &owner, const void *data);
+		Light(std::weak_ptr<GameObject> owner, const void *data);
 		Light &operator=(Light &&);
 		~Light();
 		void setPosition(C3D_FVec& position);

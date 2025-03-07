@@ -10,7 +10,7 @@ namespace ql {
 
 	struct decodeparams {
 		ndsp_channel chn;
-		const char *filename;
+		const std::string& filename;
 	};
 
 	class AudioManager {
@@ -21,15 +21,14 @@ namespace ql {
 		static bool quitThread[NDSP_NUM_CHANNELS];
 		static LightEvent event[NDSP_NUM_CHANNELS];
 		/*
-		Requests a channel to play audio file on.
+		Requests a channel to play audio file on, and starts playing.
 		@param priority Priority from 0-255 with which to make request,
 		will block lower-priority channel if none available
 		@param filename Full path of the audio file to be played
 		@return NDSP channel ID the audio is played on, or -1 if no channel
 		available
 		*/
-		static ndsp_channel requestChannel(channel_prio priority,
-										   const char *filename);
+		static ndsp_channel requestChannel(channel_prio priority, const std::string& filename);
 		/*
 		Stops given channel from playing and ends any thread which is currently
 		using it. Thread may keep playing until the end of the buffer is reached

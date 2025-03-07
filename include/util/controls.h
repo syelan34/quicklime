@@ -1,11 +1,7 @@
 #pragma once
 
 #include <3ds.h>
-#include <algorithm>
 #include <citro3d.h>
-#include <string>
-#include <unordered_map>
-#include <utility>
 
 namespace ql::controls {
 	// mapping for key name
@@ -38,9 +34,16 @@ namespace ql::controls {
 		QL_KEY_RIGHT		 = 25,
 		QL_KEY_TOUCH		 = 26
 	};
+	
+	Result attemptConnectCirclePadPro();
 
-	void update();
 	void init();
+	
+	/**
+     * @brief Exit the HID monitoring thread
+     * @brief Disables the accelerometer and gyroscope
+     */
+	void exit();
 
 	/**
 	 * @brief Check if key was pressed this frame
@@ -74,8 +77,7 @@ namespace ql::controls {
 	/**
 	 * @returns The internal gyro angular rate (in deg/s)
 	 */
-	const angularRate
-	gyroRate(); // this way no one can modify the internal states
+	const angularRate gyroRate(); // this way no one can modify the internal states
 	/**
 	 * @returns The internal gyro position (in radians)
 	 */

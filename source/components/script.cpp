@@ -2,9 +2,9 @@
 #include "gameobject.h"
 #include <string>
 namespace ql {
-	GameObject *Script::find(std::string object) { return owner->find(object); }
+	std::weak_ptr<GameObject> Script::find(std::string object) { return owner.lock()->find(object); }
 
-	Script::Script(GameObject &_owner) : owner(&_owner) {}
+	Script::Script(std::weak_ptr<GameObject> _owner) : owner(_owner) {}
 
 	void Script::SetEnabled(bool enabled) {
 		bool wasenabled = this->enabled;

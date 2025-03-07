@@ -11,10 +11,10 @@ namespace ql {
 	class MeshRenderer {
 		std::shared_ptr<mesh> meshdata;
 		std::shared_ptr<shader> mat;
-		GameObject *parent;
+		std::weak_ptr<GameObject> parent;
 
 	  public:
-		MeshRenderer(GameObject &obj, const void *data);
+		MeshRenderer(std::weak_ptr<GameObject> obj, const void *data);
 		MeshRenderer(MeshRenderer &&other);
 		void render(C3D_Mtx &view, C3D_Mtx &projection);
 		MeshRenderer &operator=(MeshRenderer &&other);

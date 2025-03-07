@@ -1,5 +1,4 @@
 #include "audiomanager.h"
-#include "3ds/types.h"
 #include "audiosource.h"
 #include "console.h"
 #include "decoders.h"
@@ -28,13 +27,14 @@ namespace ql {
 
 	void AudioManager::init() {
 		LightLock_Init(&l);
+		ndspInit();
 		ndspSetCallback(callbackFunc, nullptr);
 		for (auto &ev : event)
 			LightEvent_Init(&ev, RESET_ONESHOT);
 	}
 
 	ndsp_channel AudioManager::requestChannel(channel_prio priority,
-											  const char *file) {
+											  const std::string& file) {
 		LightLock_Guard lock(l);
 		channel_prio lowestprio = 0;
 		ndsp_channel id			= -1;
@@ -55,6 +55,7 @@ namespace ql {
 			return -1;
 		if (id < 0 || id > 23)
 			return -1;
+		
 		// force disable the running channel
 		SceneManager::currentScene->reg.view<AudioSource>().each([&](auto &a) {
 			if (a.voiceID == id)
@@ -77,13 +78,7 @@ namespace ql {
 
 		ASSERT(fn != nullptr, "Invalid audio file type");
 
-		int32_t threadpriority = 0x30;
-		svcGetThreadPriority(&threadpriority, CUR_THREAD_HANDLE);
-		threadpriority -= 1;
-		threadpriority	 = threadpriority < 0x18 ? 0x18 : threadpriority;
-		threadpriority	 = threadpriority > 0x3F ? 0x3F : threadpriority;
-		audioThreads[id] = threadCreate(fn, &p, AUDIO_THREAD_STACK_SZ,
-										threadpriority, -1, false);
+		audioThreads[id] = threadCreate(fn, &p, AUDIO_THREAD_STACK_SZ, AUDIO_THREAD_PRIORITY, CORE0, false);
 		Console::log("Playing using channel %d", id);
 		return id;
 	}

@@ -12,7 +12,7 @@ namespace ql {
             bool iskinematic;
         };
     }
-    RigidBody::RigidBody(GameObject& parent, const void* data): parent(&parent) {
+    RigidBody::RigidBody(std::weak_ptr<GameObject> parent, const void* data): parent(parent) {
         mass = 1;
         drag = 0;
         angulardrag = 0;
@@ -31,7 +31,7 @@ namespace ql {
         usegravity = other.usegravity;
         iskinematic = other.iskinematic;
         parent = other.parent;
-        other.parent = nullptr;
+        other.parent = {};
     }
     
     RigidBody::RigidBody(RigidBody&& other) {
@@ -42,7 +42,7 @@ namespace ql {
         usegravity = other.usegravity;
         iskinematic = other.iskinematic;
         parent = other.parent;
-        other.parent = nullptr;
+        other.parent = {};
     }
     
     RigidBody& RigidBody::operator=(RigidBody& other) {
@@ -65,7 +65,7 @@ namespace ql {
         usegravity = other.usegravity;
         iskinematic = other.iskinematic;
         parent = other.parent;
-        other.parent = nullptr;
+        other.parent = {};
         
         return *this;
     }

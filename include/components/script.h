@@ -1,23 +1,23 @@
 #pragma once
 
-#include "util/gameobject.h"
 #include <external/entt/entt.hpp>
 #include <string>
+#include "util/gameobject.h"
 
 namespace ql {
 	class Script {
-
 	  protected:
-		GameObject *owner;
+		std::weak_ptr<GameObject> owner;
 		template <class T> inline T *GetComponent() {
-			return owner->reg.try_get<T>(owner->id);
+		    if (owner.expired()) return nullptr;
+			return owner.lock()->s.reg.try_get<T>(owner.lock()->id);
 		}
 
-		GameObject *find(std::string object);
+		std::weak_ptr<GameObject> find(std::string object);
 
 	  public:
 		bool enabled = true;
-		Script(GameObject &owner);
+		Script(std::weak_ptr<GameObject> owner);
 		void SetEnabled(bool enabled);
 		virtual ~Script(){};
 		virtual void Awake(void){};

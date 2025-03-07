@@ -4,7 +4,7 @@
 
 LightLock ql::ComponentManager::_l = {};
 
-bool ql::ComponentManager::addComponent(const char *name, GameObject &obj,
+bool ql::ComponentManager::addComponent(const char *name, std::weak_ptr<GameObject> obj,
 									const void *data) {
 	LightLock_Guard l(_l);
 	if (getComponentMap().find(name) == getComponentMap().end()) {
@@ -18,7 +18,7 @@ bool ql::ComponentManager::addComponent(const char *name, GameObject &obj,
 	return true;
 }
 
-bool ql::ComponentManager::addScript(const char *name, GameObject &obj) {
+bool ql::ComponentManager::addScript(const char *name, std::weak_ptr<GameObject> obj) {
 	LightLock_Guard l(_l);
 	if (getScriptMap().find(name) == getScriptMap().end()) {
 		Console::error("Unknown script %s", name);

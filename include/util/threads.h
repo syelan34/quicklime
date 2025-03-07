@@ -10,10 +10,24 @@ namespace ql {
 		LightLock_Guard(LightLock &lock);
 		~LightLock_Guard();
 	};
+	
+	template <typename T> requires(!std::is_pointer_v<T>)
+	class LightLock_Mutex;
 
+	template <typename T> class LightLock_Mutex_Guard {
+		LightLock_Mutex<T> &mut;
+
+	  public:
+		LightLock_Mutex_Guard(LightLock_Mutex<T> &mut) : mut(mut) {
+			LightLock_Lock(&mut._lock);
+		}
+		~LightLock_Mutex_Guard() { LightLock_Unlock(&mut._lock); }
+	};
+	
 	template <typename T>
 		requires(!std::is_pointer_v<T>)
 	class LightLock_Mutex {
+	    friend class LightLock_Mutex_Guard<T>;
 		LightLock _lock;
 		T _val;
 
@@ -24,19 +38,6 @@ namespace ql {
 		}
 		T *operator->() { return &_val; }
 		T &operator*() { return _val; }
-		void lock() { LightLock_Lock(&_lock); }
-		unsigned int try_lock() { return LightLock_TryLock(&_lock); }
-		void unlock() { LightLock_Unlock(&_lock); }
-		~LightLock_Mutex() { LightLock_Unlock(&_lock); }
-	};
-
-	template <typename T> class LightLock_Mutex_Guard {
-		LightLock_Mutex<T> &mut;
-
-	  public:
-		LightLock_Mutex_Guard(LightLock_Mutex<T> &mut) : mut(mut) {
-			mut.lock();
-		}
-		~LightLock_Mutex_Guard() { mut.unlock(); }
+		LightLock_Mutex_Guard<T> lock() { return LightLock_Mutex_Guard(*this); }
 	};
 } // namespace ql

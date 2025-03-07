@@ -151,9 +151,9 @@ namespace ql {
 				   SCN_X, SceneManager::currentScene->name.c_str());
 			printf("\e[s\e[%u;%uHHeap Usage: %u KiB         \e[u", MEM_Y, MEM_X,
 				   mallinfo().uordblks / 1024);
-			printf("\e[s\e[%u;%uHLinear RAM Free: %u KiB         \e[u",
+			printf("\e[s\e[%u;%uHLinear RAM Free: %lu KiB         \e[u",
 				   MEM_Y + 1, MEM_X, linearSpaceFree() / 1024);
-			printf("\e[s\e[%u;%uHVRAM Free: %u KiB         \e[u", MEM_Y + 2,
+			printf("\e[s\e[%u;%uHVRAM Free: %lu KiB         \e[u", MEM_Y + 2,
 				   MEM_X, vramSpaceFree() / 1024);
 			printf("\e[s\e[%u;%uHVertices: %u\e[u", NV_Y, NV_X,
 				   stats::_vertices);

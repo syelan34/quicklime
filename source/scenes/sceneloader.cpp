@@ -44,9 +44,6 @@ namespace ql {
 			Console::error("Params are null");
 			return;
 		}
-		TickCounter sceneloadtimecounter;
-
-		osTickCounterStart(&sceneloadtimecounter);
 
 		sceneLoadThreadParams &p =
 			*(sceneLoadThreadParams *)params; // reference to not make a copy
@@ -58,20 +55,16 @@ namespace ql {
 
 		remove_whitespace(textstr);
 		std::string_view text{textstr.get()};
-		Console::log("loaded scene file, length %lu", text.size());
-		Console::log(text.data());
 
-		SceneLoader::parseObjectAsync(
+		
+		p.s->root = SceneLoader::parseObjectAsync(
 			p.s, text, text.size(),
 			p.progress); // parse the whole object tree
-		p.s->root  = &p.s->objects.front();
 		p.progress = 1;
 		p.isdone   = true;
 
-		osTickCounterUpdate(&sceneloadtimecounter);
 
 		Console::success("finished loading scene file");
-		Console::success("in %lfms", osTickCounterRead(&sceneloadtimecounter));
 
 		if (!p.activate)
 			LightEvent_Wait(&p.event); // if the user doesn't want it activated
@@ -127,34 +120,31 @@ namespace ql {
 		remove_whitespace(textstr);
 		std::string_view text{textstr.get()};
 		Console::success("read scene file");
-		Console::log(text.data());
 
 		// parse the whole object tree recursively
-		parseObject(out, text);
-		out->root = &out->objects.back();
-		Console::success("finished reading scene file");
+		out->root = parseObject(out, text);
+		Console::success("finished parsing scene file");
 
 		SceneManager::setScene(out);
 		return true;
 	}
 
-	void SceneLoader::printSceneTree(GameObject &root, int indentlevel) {
+	void SceneLoader::printSceneTree(std::shared_ptr<GameObject> &root, int indentlevel) {
 		Console::log("%.*s%s", indentlevel * 2,
 					 "| | | | | | | | | | | | | | | | | | | | | | | | | | | | ",
-					 root.name.c_str());
-		for (GameObject *obj : root.children) {
+					 root->name.c_str());
+		for (auto obj : root->children) {
 			if (!obj)
 				continue; // make sure children aren't empty references
-			printSceneTree(*obj, indentlevel + 1);
+			printSceneTree(obj, indentlevel + 1);
 		}
 	}
 
 	void SceneLoader::parseChildren(std::unique_ptr<Scene> &s,
-									GameObject &object,
+									std::shared_ptr<GameObject> object,
 									std::string_view &input) {
 		while (input[0] != ']' && input.size() > 0) {
-			parseObject(s, input);
-			object.addChild(s->objects.back());
+			object->assignChild(parseObject(s, input));
 		}
 		input.remove_prefix(input.find(']') + 1);
 		if (input[0] == ',')
@@ -162,23 +152,20 @@ namespace ql {
 	}
 
 	void SceneLoader::parseChildrenAsync(std::unique_ptr<Scene> &s,
-										 GameObject &object,
+										 std::shared_ptr<GameObject>object,
 										 std::string_view &input,
 										 unsigned int size, float &progress) {
 		while (input[0] != ']' && input.size() > 0) {
-			parseObjectAsync(s, input, size, progress);
-			object.addChild(s->objects.back());
+			object->assignChild(parseObjectAsync(s, input, size, progress));
 		}
 		input.remove_prefix(input.find(']') + 1);
 		if (input[0] == ',')
 			input.remove_prefix(1);
 	}
 
-	void SceneLoader::parseObject(std::unique_ptr<Scene> &s,
+	std::shared_ptr<GameObject> SceneLoader::parseObject(std::unique_ptr<Scene> &s,
 								  std::string_view &input) {
-		s->objects.emplace_back(std::string{input.substr(0, input.find('['))},
-								*s.get());
-		GameObject &object = s->objects.back();
+		auto object = std::make_shared<GameObject>(std::string{input.substr(0, input.find('['))}, *s.get());
 
 		input.remove_prefix(input.find('[') + 1); // go to start of objects
 
@@ -201,15 +188,15 @@ namespace ql {
 		input.remove_prefix(input.find(']') + 1);
 		if (input[0] == ',')
 			input.remove_prefix(1);
+		return object;
 	}
 
-	void SceneLoader::parseObjectAsync(std::unique_ptr<Scene> &s,
+	std::shared_ptr<GameObject> SceneLoader::parseObjectAsync(std::unique_ptr<Scene> &s,
 									   std::string_view &input,
 									   unsigned int size, float &progress) {
 		THREAD_YIELD; // yield thread so the loader doesn't hog the cpu
-		s->objects.emplace_back(std::string{input.substr(0, input.find('['))},
-								*s.get());
-		GameObject &object = s->objects.back();
+		auto object = std::make_shared<GameObject>(std::string{input.substr(0, input.find('['))},
+*s.get());
 		input.remove_prefix(input.find('[') + 1); // go to start of objects
 		for (int i = 0; i < 3; i++) {
 			std::string attr{input.substr(
@@ -235,21 +222,18 @@ namespace ql {
 		progress = 1 - (((float)input.size()) / size);
 		printf("\e[s\e[24;%uH%c\e[u", (int)size * 40, '-');
 		// Console::log("Progress %f", progress);
+		return object;
 	}
 
 	void SceneLoader::parseScripts(std::unique_ptr<Scene> &s,
-								   GameObject &object,
+								   std::shared_ptr<GameObject>object,
 								   std::string_view &input) {
 		while (input[0] != ']') { // ] means end of the section
 			if (input.find(',') < input.find(']')) { // this means there is a , closer than a ] so there must be at least another value
-				ComponentManager::addScript(
-					std::string(input.substr(0, input.find(']'))).c_str(),
-					object);
+				ComponentManager::addScript(std::string(input.substr(0, input.find(']'))).c_str(), object);
 				input.remove_prefix(input.find(',') + 1); // go to next one
 			} else {									  // this means there is only one in there
-				ComponentManager::addScript(
-					std::string(input.substr(0, input.find(']'))).c_str(),
-					object);
+				ComponentManager::addScript(std::string(input.substr(0, input.find(']'))).c_str(), object);
 				input.remove_prefix(input.find(']') +
 									1); // go to the end of the section
 				break;
@@ -259,7 +243,7 @@ namespace ql {
 	}
 
 	void SceneLoader::parseComponents(std::unique_ptr<Scene> &s,
-									  GameObject &object,
+									  std::shared_ptr<GameObject> object,
 									  std::string_view &input) {
 		while (input[0] != ']') { // ] means end of the section
 			if (input.find(',') <
@@ -279,7 +263,7 @@ namespace ql {
 	}
 
 	void SceneLoader::parseComponent(std::unique_ptr<Scene> &s,
-									 GameObject &object,
+									 std::shared_ptr<GameObject> object,
 									 std::string_view input) {
 		std::string componentname{input.substr(0, input.find('{'))};
 

@@ -25,16 +25,13 @@ namespace ql {
 
 	// composition based renderer type
 	class Collider {
-		std::variant<DummyRenderer, MeshRenderer> rnd;
-		RendererType t;
+		ColliderType t;
 		u32 layer = 1; // by default on base layer (layer 1)
 		GameObject *parent;
 		btCollisionObject col;
 
 	  public:
 		Collider(GameObject &obj, const void *data);
-		void render(C3D_Mtx &view, C3D_Mtx& projection, u32 mask);
-		RenderQueue queue() const;
 		Collider& operator=(Collider&&);
 	};
 } // namespace ql

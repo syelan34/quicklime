@@ -9,29 +9,32 @@
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include "components/script.h"
 
 namespace ql {
 	template <typename T>
-	concept validcomponent = requires(GameObject &obj, const void *data) {
+	concept validcomponent = requires(std::weak_ptr<GameObject> obj, const void *data) {
 								 T(obj, data);
 							 } || std::is_base_of_v<Script, T>;
 
 	class ComponentManager {
 		static LightLock _l;
 		ComponentManager() {}
-		template <typename T> static void attachScript(GameObject &owner) {
-			owner.scripts.push_back(std::make_unique<T>(owner));
+		template <typename T> static void attachScript(std::weak_ptr<GameObject> owner) {
+		    if (owner.expired()) return;
+			owner.lock()->s.scripts.push_back(std::make_shared<T>(owner));
 		}
 		template <typename T>
-		static void attachComponent(GameObject &obj, const void *data) {
-			obj.reg.emplace_or_replace<T>(obj.id, obj, data);
+		static void attachComponent(std::weak_ptr<GameObject> obj, const void *data) {
+		    if (obj.expired()) return;
+		    obj.lock()->addComponent<T>(obj, data);
 		}
 
 	  public:
         template <typename T>
             requires validcomponent<T>
-        static bool registerComponent(const char *name) {
-            Console::log(name);
+        static bool registerComponent(const std::string name) {
+            Console::log(name.c_str());
         if constexpr (std::is_base_of_v<Script, T>)
             getScriptMap()[name] = ComponentManager::attachScript<T>;
         else
@@ -44,23 +47,20 @@ namespace ql {
 			return true;
 		}
 
-		static bool addComponent(const char *name, GameObject &obj,
+		static bool addComponent(const char *name, std::weak_ptr<GameObject> obj,
 								 const void *data = nullptr);
-		static bool addScript(const char *name, GameObject &obj);
+		static bool addScript(const char *name, std::weak_ptr<GameObject> obj);
 
 	  private:
 		// Use Meyer's singleton to prevent SIOF
-		static std::unordered_map<std::string, void (*)(GameObject &)> &
+		static std::unordered_map<std::string, void (*)(std::weak_ptr<GameObject>)> &
 		getScriptMap() {
-			static std::unordered_map<std::string, void (*)(GameObject &)> map;
+			static std::unordered_map<std::string, void (*)(std::weak_ptr<GameObject>)> map;
 			return map;
 		}
-		static std::unordered_map<std::string,
-								  void (*)(GameObject &, const void *)> &
+		static std::unordered_map<std::string, void (*)(std::weak_ptr<GameObject>, const void *)> &
 		getComponentMap() {
-			static std::unordered_map<std::string,
-									  void (*)(GameObject &, const void *)>
-				map;
+			static std::unordered_map<std::string, void (*)(std::weak_ptr<GameObject>, const void *)> map;
 			return map;
 		}
 	};

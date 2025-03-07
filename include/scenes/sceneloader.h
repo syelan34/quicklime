@@ -18,25 +18,25 @@ namespace ql {
 	class SceneLoader {
 		SceneLoader() = delete;
 		friend void sceneLoadThread(void *params);
-		static void parseChildren(std::unique_ptr<Scene> &s, GameObject &object,
+		static void parseChildren(std::unique_ptr<Scene> &s, std::shared_ptr<GameObject> object,
 								  std::string_view &input);
 		static void parseChildrenAsync(std::unique_ptr<Scene> &s,
-									   GameObject &object,
+									   std::shared_ptr<GameObject> object,
 									   std::string_view &input,
 									   unsigned int size, float &progress);
 		static void parseComponent(std::unique_ptr<Scene> &s,
-								   GameObject &object, std::string_view input);
+								   std::shared_ptr<GameObject> object, std::string_view input);
 		static void parseComponents(std::unique_ptr<Scene> &s,
-									GameObject &object,
+									std::shared_ptr<GameObject> object,
 									std::string_view &input);
-		static void parseScripts(std::unique_ptr<Scene> &s, GameObject &object,
+		static void parseScripts(std::unique_ptr<Scene> &s, std::shared_ptr<GameObject> object,
 								 std::string_view &input);
-		static void parseObject(std::unique_ptr<Scene> &s,
+		static std::shared_ptr<GameObject> parseObject(std::unique_ptr<Scene> &s,
 								std::string_view &input);
-		static void parseObjectAsync(std::unique_ptr<Scene> &s,
+		static std::shared_ptr<GameObject> parseObjectAsync(std::unique_ptr<Scene> &s,
 									 std::string_view &input, unsigned int size,
 									 float &progress);
-		static void printSceneTree(GameObject &root, int indentlevel = 0);
+		static void printSceneTree(std::shared_ptr<GameObject> &root, int indentlevel = 0);
 
 	  public:
 		/**

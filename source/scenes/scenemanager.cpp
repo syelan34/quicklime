@@ -49,7 +49,8 @@ namespace ql {
 		loadSceneNextFrame = false;
 
 		// first delete old scene
-		Console::log("Scene try reset");
+		if (currentScene)
+		    Console::log("Scene '%s' try reset", currentScene->name.c_str());
 		currentScene.reset();
 		Console::success("Scene reset");
 

@@ -1,21 +1,19 @@
 #pragma once
 
-#include "camera.h"
-#include "gameobject.h"
 #include <3ds.h>
 #include <citro3d.h>
 #include <external/entt/entt.hpp>
-#include <list>
 #include <string>
 #include <bullet/btBulletDynamicsCommon.h>
 
 namespace ql {
+    class Script;
+    class GameObject;
 	class Scene {
 		LightLock lock;
 		std::string _name;
-		GameObject *root;
-		// needs to be a list so it doesn't get reallocated (sad perf hit)
-		std::list<GameObject> objects;
+		std::vector<std::shared_ptr<Script>> scripts;
+		std::shared_ptr<GameObject> root;
 		entt::registry reg;
 		
 		// physics
@@ -30,13 +28,12 @@ namespace ql {
 		friend class AudioSource;
 		friend class AudioManager;
 		friend class GameObject;
+		friend class Script;
+		friend class ComponentManager;
 		friend void physicsThread(void *);
 		friend void sceneLoadThread(void *params);
 
-		void act_on_objects(void (GameObject::*action)()) {
-			for (GameObject &child : objects)
-				(child.*action)();
-		}
+		void act_on_scripts(void (Script::*action)());
 
 	  public:
 		const std::string &name = _name;

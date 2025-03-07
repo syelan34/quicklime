@@ -23,8 +23,8 @@ namespace ql {
 		};
 	} // namespace
 
-	AudioSource::AudioSource(GameObject &obj, const void *data) {
-		parent = &obj;
+	AudioSource::AudioSource(std::weak_ptr<GameObject> obj, const void *data) {
+		parent = obj;
 		AudioSourceParams p;
 		if (data)
 			p = *(AudioSourceParams *)data;
@@ -43,6 +43,8 @@ namespace ql {
 	void AudioSource::update() {
 		if (voiceID < 0 || voiceID > 24)
 			return; // invalid channel
+		ASSERT(!parent.expired(), "Parent expired");
+		auto p = parent.lock();
 		// pause channel if asked
 		ndspChnSetPaused(voiceID, paused);
 
@@ -55,17 +57,18 @@ namespace ql {
 			lvol = 0;
 			rvol = 0;
 		} else {
-			GameObject *l = nullptr;
-			parent->s.reg.view<Listener>().each(
+			std::weak_ptr<GameObject> l;
+			p->s.reg.view<Listener>().each(
 				[&](Listener &listener) {
 					if (listener.active)
 						l = listener.parent;
 				});
-			ASSERT(l != nullptr, "No listener in scene");
+			ASSERT(!l.expired(), "No listener in scene");
+			auto lp = l.lock();
 
 			float dist =
-				FVec3_Distance(parent->getComponent<Transform>()->position,
-							   l->getComponent<Transform>()->position);
+				FVec3_Distance(p->getComponent<Transform>()->position,
+							   lp->getComponent<Transform>()->position);
 			float distatten;
 			switch (rolloffMode) {
 			case ROLLOFF_LIN:
@@ -93,7 +96,7 @@ namespace ql {
 		ndspChnSetMix(voiceID, mix);
 
 		// apply the filter on this object
-		if (AudioFilter *filter = parent->getComponent<AudioFilter>())
+		if (AudioFilter *filter = p->getComponent<AudioFilter>())
 			filter->apply(voiceID);
 	}
 
@@ -101,7 +104,7 @@ namespace ql {
 		Stop(); // end anything still playing
 
 		// start audio thread
-		voiceID = AudioManager::requestChannel(priority, file.c_str());
+		voiceID = AudioManager::requestChannel(priority, file);
 		playing = true;
 	};
 
