@@ -46,7 +46,13 @@ namespace {
 		// ql::physicsInit(54719563); // 50ms tick speed
 		// ql::physicsInit(20.f);
 
-		ql::SceneLoader::load(ql::scenename);
+		if (ql::SceneLoader::load(ql::scenename)) {
+			ql::SceneManager::init();
+		} else {
+			ql::Console::error("Failed to load scene: %s", ql::scenename);
+			// optionally exit or fallback
+			ql::programShouldExitGraceful = true;
+		}
 	}
 	void update() {
 		ql::SceneManager::update();
