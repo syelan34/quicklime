@@ -114,19 +114,23 @@ namespace ql {
 
 	bool SceneLoader::load(std::string name) {
 		std::unique_ptr<Scene> out = std::make_unique<Scene>(name);
+		ASSERT(out, "Unable to create scene");
+		if (!out) return false;
 
 		auto textstr{readFileAligned(("romfs:/scenes/" + name + ".scene"))};
 		ASSERT(textstr != nullptr, "Invalid scene file");
+		if (textstr == nullptr) return false;
 		remove_whitespace(textstr);
 		std::string_view text{textstr.get()};
 		Console::success("read scene file");
 
 		// parse the whole object tree recursively
 		out->root = parseObject(out, text);
+		ASSERT(out->root, "No object tree in scene");
+		if (!out->root) return false;
 		Console::success("finished parsing scene file");
 
-		SceneManager::setScene(out);
-		return true;
+		return SceneManager::setScene(out);
 	}
 
 	void SceneLoader::printSceneTree(std::shared_ptr<GameObject> &root, int indentlevel) {
