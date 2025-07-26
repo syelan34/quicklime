@@ -43,7 +43,7 @@ namespace ql {
 		 * @brief Load scene from file
 		 *
 		 * @param file Path of .scene file to read
-		 * @return std::unique_ptr<Scene> Pointer to the scene instance
+		 * @return bool Whether the load failed or succeeded
 		 */
 		static bool load(std::string file);
 
