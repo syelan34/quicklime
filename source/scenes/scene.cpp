@@ -8,7 +8,7 @@
 #include <cmath>
 #include "script.h"
 #include <bullet/btBulletDynamicsCommon.h>
-#include <threads.h>
+#include "util/threads.h"
 
 namespace ql {
 	Scene::Scene(std::string name): 
@@ -27,6 +27,13 @@ namespace ql {
 		Console::log("Scene destructor");
 		scripts.clear();
 		root.reset();
+
+		// Deallocate Physics World
+		delete _world;
+		delete _solver;
+		delete _collisionConfiguration;
+		delete _broadphase;
+		delete _dispatcher;
 	}
 
 	void Scene::awake() {

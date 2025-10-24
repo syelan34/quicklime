@@ -130,7 +130,8 @@ namespace ql {
 		if (!out->root) return false;
 		Console::success("finished parsing scene file");
 
-		return SceneManager::setScene(out);
+		SceneManager::setScene(out);
+		return true;
 	}
 
 	void SceneLoader::printSceneTree(std::shared_ptr<GameObject> &root, int indentlevel) {

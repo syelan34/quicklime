@@ -1,22 +1,7 @@
 #include <3ds.h>
 #include <citro2d.h>
 #include <citro3d.h>
-
-#include "sceneloader.h"
-#include "audiomanager.h"
-#include "componentmanager.h"
-#include "console.h"
-#include "controls.h"
-#include "defines.h"
-#include "scenemanager.h"
-#include "ql_time.h"
-
-#include "physics.h"
-#include "scenename.h"
-
-namespace ql {
-    extern bool programShouldExitGraceful;
-}
+#include "ql.h"
 
 namespace {
     void* stack_top = NULL;
@@ -46,12 +31,12 @@ namespace {
 		// ql::physicsInit(54719563); // 50ms tick speed
 		// ql::physicsInit(20.f);
 
-		if (ql::SceneLoader::load(ql::scenename)) {
+		if (ql::SceneLoader::load(ql::Project::entrypointScene)) {
 			ql::SceneManager::init();
 		} else {
-			ql::Console::error("Failed to load scene: %s", ql::scenename);
+			ql::Console::error("Failed to load scene: %s", ql::Project::entrypointScene);
 			// optionally exit or fallback
-			ql::programShouldExitGraceful = true;
+			ql::Project::programShouldExitGraceful = true;
 		}
 	}
 	void update() {
@@ -79,7 +64,7 @@ namespace {
 
 int main() {
 	prgrminit();
-	while (aptMainLoop() && !ql::programShouldExitGraceful) {
+	while (aptMainLoop() && !ql::Project::programShouldExitGraceful) {
 		update();
 		draw();
 	}

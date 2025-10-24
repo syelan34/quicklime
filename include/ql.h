@@ -10,11 +10,13 @@
 
 // scenes
 #include "scenes/sceneloader.h"
+#include "scenes/scenemanager.h"
 
 // utility
 #include "util/console.h"
 #include "util/controls.h"
 #include "util/ql_time.h"
+#include "util/project.h"
 
 // components
 #include "components/componentmanager.h"
