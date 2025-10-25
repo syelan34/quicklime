@@ -10,7 +10,6 @@
 
 // scenes
 #include "scenes/sceneloader.h"
-#include "scenes/scenemanager.h"
 
 // utility
 #include "util/console.h"
