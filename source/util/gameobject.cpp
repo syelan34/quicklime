@@ -72,4 +72,5 @@ ql::GameObject::~GameObject() {
 	if (id != entt::null)
 		s.reg.destroy(id);
 	Camera::cameraObjectListDirty = true;
+	Console::log("Children Size: ", children.size());
 }

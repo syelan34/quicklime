@@ -4,7 +4,7 @@
 #include "scenemanager.h"
 #include "ql_time.h"
 #include "stats.h"
-#include "threads.h"
+#include "util/threads.h"
 #include <stdio.h>
 #include <malloc.h>
 

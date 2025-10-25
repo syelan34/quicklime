@@ -4,7 +4,7 @@
 #include "defines.h"
 #include "ql_assert.h"
 #include "ql_time.h"
-#include "threads.h"
+#include "util/threads.h"
 // #include "ir_user.h"
 #include <malloc.h>
 #include <3ds.h>
@@ -24,7 +24,7 @@ namespace ql::controls {
 		Thread controlsThread;
 		bool cppConnected = false;
 		volatile bool quitThread = false;
-		circlePadProInputResponse cppInputs, oldcppInputs;
+		//circlePadProInputResponse cppInputs, oldcppInputs;
 		size_t refreshrate = 1/60.f * 1000000000;
 		Handle connectionstatusevent, receivepacketevent;
 		// gyro defaults
@@ -69,26 +69,26 @@ namespace ql::controls {
     			kHeld	= hidKeysHeld();
     			kUp		= hidKeysUp();
                 
-                if (cppConnected) {
-                    Result res;
-                    res = svcWaitSynchronization(receivepacketevent, 0);
-                    if (R_SUCCEEDED(res)) {
-                        // iruserGetCirclePadProState(&cppInputs);
-                        csPos = cppInputs.cstick.csPos;
-                        
-                        if (oldcppInputs.status.r_pressed && !cppInputs.status.r_pressed) kDown |= KEY_R;
-                        else if (!oldcppInputs.status.r_pressed && !cppInputs.status.r_pressed) kHeld |= KEY_R;
-                        else if (!oldcppInputs.status.r_pressed && cppInputs.status.r_pressed) kUp |= KEY_R;
-                        if (oldcppInputs.status.zr_pressed && !cppInputs.status.zr_pressed) kDown |= KEY_ZR;
-                        else if (!oldcppInputs.status.zr_pressed && !cppInputs.status.zr_pressed) kHeld |= KEY_ZR;
-                        else if (!oldcppInputs.status.zr_pressed && cppInputs.status.zr_pressed) kUp |= KEY_ZR;
-                        if (oldcppInputs.status.zl_pressed && !cppInputs.status.zl_pressed) kDown |= KEY_ZL;
-                        else if (!oldcppInputs.status.zl_pressed && !cppInputs.status.zl_pressed) kHeld |= KEY_ZL;
-                        else if (!oldcppInputs.status.zl_pressed && cppInputs.status.zl_pressed) kUp |= KEY_ZL;
-                    }
-                }
+                //if (cppConnected) {
+                //    Result res;
+                //    res = svcWaitSynchronization(receivepacketevent, 0);
+                //    if (R_SUCCEEDED(res)) {
+                //        // iruserGetCirclePadProState(&cppInputs);
+                //        csPos = cppInputs.cstick.csPos;
+                //        
+                //        if (oldcppInputs.status.r_pressed && !cppInputs.status.r_pressed) kDown |= KEY_R;
+                //        else if (!oldcppInputs.status.r_pressed && !cppInputs.status.r_pressed) kHeld |= KEY_R;
+                //        else if (!oldcppInputs.status.r_pressed && cppInputs.status.r_pressed) kUp |= KEY_R;
+                //        if (oldcppInputs.status.zr_pressed && !cppInputs.status.zr_pressed) kDown |= KEY_ZR;
+                //        else if (!oldcppInputs.status.zr_pressed && !cppInputs.status.zr_pressed) kHeld |= KEY_ZR;
+                //        else if (!oldcppInputs.status.zr_pressed && cppInputs.status.zr_pressed) kUp |= KEY_ZR;
+                //       if (oldcppInputs.status.zl_pressed && !cppInputs.status.zl_pressed) kDown |= KEY_ZL;
+                //        else if (!oldcppInputs.status.zl_pressed && !cppInputs.status.zl_pressed) kHeld |= KEY_ZL;
+                //        else if (!oldcppInputs.status.zl_pressed && cppInputs.status.zl_pressed) kUp |= KEY_ZL;
+                //    }
+                //}
                 
-                oldcppInputs = cppInputs;
+                //oldcppInputs = cppInputs;
     
     			gRate.x *= gyro_s;
     			gRate.y *= gyro_s;
@@ -120,13 +120,13 @@ namespace ql::controls {
 		sharedmemsize = round_up(0x30 + PACKET_BUFFER_SIZE + PACKET_BUFFER_SIZE, 0x1000);
         sharedmem = (u32*)memalign(sharedmemsize, 0x1000);
         ql::Console::log("shared mem size %p addr %p", sharedmemsize, sharedmem);
-	    res = iruserInit(sharedmem, sharedmemsize, PACKET_BUFFER_SIZE, PACKET_COUNT);
+	    //res = iruserInit(sharedmem, sharedmemsize, PACKET_BUFFER_SIZE, PACKET_COUNT);
 		Console::log("init %u", res);
 		ASSERT(res == 0, "Failed to initialize IR:USER, result %p", (void*)R_DESCRIPTION(res));
-        res = IRUSER_GetConnectionStatusEvent(&connectionstatusevent);
+        //res = IRUSER_GetConnectionStatusEvent(&connectionstatusevent);
         Console::log("connectionstatusevent %u", res);
         ASSERT(res == 0, "Failed to get connection status event");
-        res = IRUSER_GetReceiveEvent(&receivepacketevent);
+        //res = IRUSER_GetReceiveEvent(&receivepacketevent);
         Console::log("receiveevent %u", res);
         ASSERT(res == 0, "Failed to get receive packet event");
 		
@@ -146,16 +146,16 @@ namespace ql::controls {
     }
     
     Result attemptConnectCirclePadPro() {
-        Result res = IRUSER_RequireConnection(1); // circle pad pro id is 1
-        Console::log("connection result %u", res);
-        if (R_FAILED(res)) return res;
-        res = iruserCPPRequestInputPolling(CPP_CONNECTION_POLLING_PERIOD_MS);
-        Console::log("input polling %u", res);
-        if (R_FAILED(res)) return res;
-        res = svcWaitSynchronization(receivepacketevent, 100000); // wait for 100ms for a response
-        Console::log("waiting %u", res);
-        cppConnected = R_SUCCEEDED(res);
-        return res;
+        //Result res = IRUSER_RequireConnection(1); // circle pad pro id is 1
+    	//onsole::log("connection result %u", res);
+        //if (R_FAILED(res)) return res;
+        //res = iruserCPPRequestInputPolling(CPP_CONNECTION_POLLING_PERIOD_MS);
+        //Console::log("input polling %u", res);
+        //if (R_FAILED(res)) return res;
+        //res = svcWaitSynchronization(receivepacketevent, 100000); // wait for 100ms for a response
+        //onsole::log("waiting %u", res);
+        //cppConnected = R_SUCCEEDED(res);
+        return -1;
     }
 
 	bool getDown(key inputName) {

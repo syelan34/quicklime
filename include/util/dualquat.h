@@ -18,7 +18,7 @@ namespace ql {
 			float r;
 			float d;
 		};
-	}
+	};
 	
 	DualQuat DQ_Identity() {
 		return {{
@@ -83,6 +83,9 @@ namespace ql {
 			
 		}};
 	}
+
+	// Missing implementation
+	DualQuat DQ_Power() { return DualQuat{}; }
 	
 	DualQuat DQ_SepLERP(float t, DualQuat a, DualQuat b) {
 		C3D_FQuat _ra, _rb;
@@ -96,7 +99,7 @@ namespace ql {
 	}
 	DualQuat DQ_QLB(float t, DualQuat a, DualQuat b);
 	DualQuat DQ_ScLERP(float t, DualQuat a, DualQuat b) {
-		return DQ_Multiply(a, DQ_Power)
+		return DQ_Multiply(a, DQ_Power());
 	}
 	DualQuat DQ_SepLERP(float t, DualQuat a, DualQuat b);
 }
