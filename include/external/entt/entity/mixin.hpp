@@ -36,20 +36,6 @@ template<typename Type, typename Registry>
 struct has_on_destroy<Type, Registry, std::void_t<decltype(Type::on_destroy(std::declval<Registry &>(), std::declval<Registry>().create()))>>
     : std::true_type {};
 
-template<typename Type>
-auto *any_to_owner(any &value) noexcept {
-    using base_type = basic_registry<typename Type::entity_type, typename Type::allocator_type>;
-    auto *reg = any_cast<base_type>(&value);
-
-    if constexpr(!std::is_same_v<Type, base_type>) {
-        if(!reg) {
-            reg = any_cast<Type>(&value);
-        }
-    }
-
-    return reg;
-}
-
 } // namespace internal
 /*! @endcond */
 
@@ -130,7 +116,14 @@ private:
     }
 
     void bind_any(any value) noexcept final {
-        owner = internal::any_to_owner<registry_type>(value);
+        owner = any_cast<basic_registry_type>(&value);
+
+        if constexpr(!std::is_same_v<registry_type, basic_registry_type>) {
+            if(owner == nullptr) {
+                owner = any_cast<registry_type>(&value);
+            }
+        }
+
         underlying_type::bind_any(std::move(value));
     }
 
@@ -157,15 +150,15 @@ public:
           destruction{allocator},
           update{allocator} {
         if constexpr(internal::has_on_construct<typename underlying_type::element_type, Registry>::value) {
-            entt::sink{construction}.template connect<&underlying_type::element_type::on_construct>();
+            sink{construction}.template connect<&underlying_type::element_type::on_construct>();
         }
 
         if constexpr(internal::has_on_update<typename underlying_type::element_type, Registry>::value) {
-            entt::sink{update}.template connect<&underlying_type::element_type::on_update>();
+            sink{update}.template connect<&underlying_type::element_type::on_update>();
         }
 
         if constexpr(internal::has_on_destroy<typename underlying_type::element_type, Registry>::value) {
-            entt::sink{destruction}.template connect<&underlying_type::element_type::on_destroy>();
+            sink{destruction}.template connect<&underlying_type::element_type::on_destroy>();
         }
     }
 
@@ -177,7 +170,7 @@ public:
      * @param other The instance to move from.
      */
     basic_sigh_mixin(basic_sigh_mixin &&other) noexcept
-        : underlying_type{std::move(other)},
+        : underlying_type{static_cast<underlying_type &&>(other)},
           owner{other.owner},
           construction{std::move(other.construction)},
           destruction{std::move(other.destruction)},
@@ -189,7 +182,7 @@ public:
      * @param allocator The allocator to use.
      */
     basic_sigh_mixin(basic_sigh_mixin &&other, const allocator_type &allocator)
-        : underlying_type{std::move(other), allocator},
+        : underlying_type{static_cast<underlying_type &&>(other), allocator},
           owner{other.owner},
           construction{std::move(other.construction), allocator},
           destruction{std::move(other.destruction), allocator},
@@ -294,48 +287,59 @@ public:
     }
 
     /**
-     * @brief Emplace elements into a storage.
-     *
-     * The behavior of this operation depends on the underlying storage type
-     * (for example, components vs entities).<br/>
-     * Refer to the specific documentation for more details.
-     *
-     * @return Whatever the underlying storage returns.
+     * @brief Creates a new identifier or recycles a destroyed one.
+     * @return A valid identifier.
      */
-    auto emplace() {
-        const auto entt = underlying_type::emplace();
+    auto generate() {
+        const auto entt = underlying_type::generate();
         construction.publish(owner_or_assert(), entt);
         return entt;
     }
 
     /**
-     * @brief Emplace elements into a storage.
-     *
-     * The behavior of this operation depends on the underlying storage type
-     * (for example, components vs entities).<br/>
-     * Refer to the specific documentation for more details.
-     *
-     * @tparam Args Types of arguments to forward to the underlying storage.
-     * @param hint A valid identifier.
-     * @param args Parameters to forward to the underlying storage.
-     * @return Whatever the underlying storage returns.
+     * @brief Creates a new identifier or recycles a destroyed one.
+     * @param hint Required identifier.
+     * @return A valid identifier.
      */
-    template<typename... Args>
-    std::conditional_t<std::is_same_v<typename underlying_type::element_type, entity_type>, entity_type, decltype(std::declval<underlying_type>().get({}))>
-    emplace(const entity_type hint, Args &&...args) {
-        if constexpr(std::is_same_v<typename underlying_type::element_type, entity_type>) {
-            const auto entt = underlying_type::emplace(hint, std::forward<Args>(args)...);
-            construction.publish(owner_or_assert(), entt);
-            return entt;
-        } else {
-            underlying_type::emplace(hint, std::forward<Args>(args)...);
-            construction.publish(owner_or_assert(), hint);
-            return this->get(hint);
+    entity_type generate(const entity_type hint) {
+        const auto entt = underlying_type::generate(hint);
+        construction.publish(owner_or_assert(), entt);
+        return entt;
+    }
+
+    /**
+     * @brief Assigns each element in a range an identifier.
+     * @tparam It Type of mutable forward iterator.
+     * @param first An iterator to the first element of the range to generate.
+     * @param last An iterator past the last element of the range to generate.
+     */
+    template<typename It>
+    void generate(It first, It last) {
+        underlying_type::generate(first, last);
+
+        if(auto &reg = owner_or_assert(); !construction.empty()) {
+            for(; first != last; ++first) {
+                construction.publish(reg, *first);
+            }
         }
     }
 
     /**
-     * @brief Patches the given instance for an entity.
+     * @brief Assigns an entity to a storage and constructs its object.
+     * @tparam Args Types of arguments to forward to the underlying storage.
+     * @param entt A valid identifier.
+     * @param args Parameters to forward to the underlying storage.
+     * @return A reference to the newly created object.
+     */
+    template<typename... Args>
+    decltype(auto) emplace(const entity_type entt, Args &&...args) {
+        underlying_type::emplace(entt, std::forward<Args>(args)...);
+        construction.publish(owner_or_assert(), entt);
+        return this->get(entt);
+    }
+
+    /**
+     * @brief Updates the instance assigned to a given entity in-place.
      * @tparam Func Types of the function objects to invoke.
      * @param entt A valid identifier.
      * @param func Valid function objects.
@@ -349,16 +353,12 @@ public:
     }
 
     /**
-     * @brief Emplace elements into a storage.
-     *
-     * The behavior of this operation depends on the underlying storage type
-     * (for example, components vs entities).<br/>
-     * Refer to the specific documentation for more details.
-     *
-     * @tparam It Iterator type (as required by the underlying storage type).
+     * @brief Assigns one or more entities to a storage and constructs their
+     * objects from a given instance.
+     * @tparam It Type of input iterator.
      * @tparam Args Types of arguments to forward to the underlying storage.
-     * @param first An iterator to the first element of the range.
-     * @param last An iterator past the last element of the range.
+     * @param first An iterator to the first element of the range of entities.
+     * @param last An iterator past the last element of the range of entities.
      * @param args Parameters to use to forward to the underlying storage.
      */
     template<typename It, typename... Args>
@@ -367,6 +367,7 @@ public:
         underlying_type::insert(first, last, std::forward<Args>(args)...);
 
         if(auto &reg = owner_or_assert(); !construction.empty()) {
+            // fine as long as insert passes force_back true to try_emplace
             for(const auto to = underlying_type::size(); from != to; ++from) {
                 construction.publish(reg, underlying_type::operator[](from));
             }
@@ -390,7 +391,9 @@ class basic_reactive_mixin final: public Type {
     using underlying_type = Type;
     using owner_type = Registry;
 
+    using alloc_traits = std::allocator_traits<typename underlying_type::allocator_type>;
     using basic_registry_type = basic_registry<typename owner_type::entity_type, typename owner_type::allocator_type>;
+    using container_type = std::vector<connection, typename alloc_traits::template rebind_alloc<connection>>;
 
     static_assert(std::is_base_of_v<basic_registry_type, owner_type>, "Invalid registry type");
 
@@ -407,7 +410,14 @@ class basic_reactive_mixin final: public Type {
 
 private:
     void bind_any(any value) noexcept final {
-        owner = internal::any_to_owner<registry_type>(value);
+        owner = any_cast<basic_registry_type>(&value);
+
+        if constexpr(!std::is_same_v<registry_type, basic_registry_type>) {
+            if(owner == nullptr) {
+                owner = any_cast<registry_type>(&value);
+            }
+        }
+
         underlying_type::bind_any(std::move(value));
     }
 
@@ -429,7 +439,8 @@ public:
      */
     explicit basic_reactive_mixin(const allocator_type &allocator)
         : underlying_type{allocator},
-          owner{} {
+          owner{},
+          conn{allocator} {
     }
 
     /*! @brief Default copy constructor, deleted on purpose. */
@@ -440,8 +451,10 @@ public:
      * @param other The instance to move from.
      */
     basic_reactive_mixin(basic_reactive_mixin &&other) noexcept
-        : underlying_type{std::move(other)},
-          owner{other.owner} {}
+        : underlying_type{static_cast<underlying_type &&>(other)},
+          owner{other.owner},
+          conn{std::move(other.conn)} {
+    }
 
     /**
      * @brief Allocator-extended move constructor.
@@ -449,8 +462,10 @@ public:
      * @param allocator The allocator to use.
      */
     basic_reactive_mixin(basic_reactive_mixin &&other, const allocator_type &allocator)
-        : underlying_type{std::move(other), allocator},
-          owner{other.owner} {}
+        : underlying_type{static_cast<underlying_type &&>(other), allocator},
+          owner{other.owner},
+          conn{std::move(other.conn), allocator} {
+    }
 
     /*! @brief Default destructor. */
     ~basic_reactive_mixin() override = default;
@@ -467,18 +482,8 @@ public:
      * @return This mixin.
      */
     basic_reactive_mixin &operator=(basic_reactive_mixin &&other) noexcept {
-        swap(other);
-        return *this;
-    }
-
-    /**
-     * @brief Exchanges the contents with those of a given storage.
-     * @param other Storage to exchange the content with.
-     */
-    void swap(basic_reactive_mixin &other) noexcept {
-        using std::swap;
-        swap(owner, other.owner);
         underlying_type::swap(other);
+        return *this;
     }
 
     /**
@@ -490,7 +495,8 @@ public:
      */
     template<typename Clazz, auto Candidate = &basic_reactive_mixin::emplace_element>
     basic_reactive_mixin &on_construct(const id_type id = type_hash<Clazz>::value()) {
-        owner_or_assert().template storage<Clazz>(id).on_construct().template connect<Candidate>(*this);
+        auto curr = owner_or_assert().template storage<Clazz>(id).on_construct().template connect<Candidate>(*this);
+        conn.push_back(std::move(curr));
         return *this;
     }
 
@@ -503,7 +509,8 @@ public:
      */
     template<typename Clazz, auto Candidate = &basic_reactive_mixin::emplace_element>
     basic_reactive_mixin &on_update(const id_type id = type_hash<Clazz>::value()) {
-        owner_or_assert().template storage<Clazz>(id).on_update().template connect<Candidate>(*this);
+        auto curr = owner_or_assert().template storage<Clazz>(id).on_update().template connect<Candidate>(*this);
+        conn.push_back(std::move(curr));
         return *this;
     }
 
@@ -516,7 +523,8 @@ public:
      */
     template<typename Clazz, auto Candidate = &basic_reactive_mixin::emplace_element>
     basic_reactive_mixin &on_destroy(const id_type id = type_hash<Clazz>::value()) {
-        owner_or_assert().template storage<Clazz>(id).on_destroy().template connect<Candidate>(*this);
+        auto curr = owner_or_assert().template storage<Clazz>(id).on_destroy().template connect<Candidate>(*this);
+        conn.push_back(std::move(curr));
         return *this;
     }
 
@@ -560,12 +568,22 @@ public:
     template<typename... Get, typename... Exclude>
     [[nodiscard]] basic_view<get_t<const basic_reactive_mixin, typename basic_registry_type::template storage_for_type<Get>...>, exclude_t<typename basic_registry_type::template storage_for_type<Exclude>...>>
     view(exclude_t<Exclude...> = exclude_t{}) {
-        owner_type &parent = owner_or_assert();
+        std::conditional_t<((std::is_const_v<Get> && ...) && (std::is_const_v<Exclude> && ...)), const owner_type, owner_type> &parent = owner_or_assert();
         return {*this, parent.template storage<std::remove_const_t<Get>>()..., parent.template storage<std::remove_const_t<Exclude>>()...};
+    }
+
+    /*! @brief Releases all connections to the underlying registry, if any. */
+    void reset() {
+        for(auto &&curr: conn) {
+            curr.release();
+        }
+
+        conn.clear();
     }
 
 private:
     basic_registry_type *owner;
+    container_type conn;
 };
 
 } // namespace entt

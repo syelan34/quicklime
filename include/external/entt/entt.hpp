@@ -1,3 +1,6 @@
+/*! @brief `EnTT` default namespace. */
+namespace entt {}
+
 // IWYU pragma: begin_exports
 #include "config/config.h"
 #include "config/macro.h"
@@ -7,7 +10,6 @@
 #include "container/table.hpp"
 #include "core/algorithm.hpp"
 #include "core/any.hpp"
-#include "core/attribute.h"
 #include "core/bit.hpp"
 #include "core/compressed_pair.hpp"
 #include "core/enum.hpp"
@@ -28,7 +30,6 @@
 #include "entity/handle.hpp"
 #include "entity/helper.hpp"
 #include "entity/mixin.hpp"
-#include "entity/observer.hpp"
 #include "entity/organizer.hpp"
 #include "entity/ranges.hpp"
 #include "entity/registry.hpp"

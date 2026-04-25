@@ -5,7 +5,6 @@
 #include <type_traits>
 #include <utility>
 #include "../config/config.h"
-#include "../core/attribute.h"
 #include "fwd.hpp"
 #include "hashed_string.hpp"
 
@@ -22,14 +21,23 @@ struct ENTT_API type_index final {
 };
 
 template<typename Type>
+[[nodiscard]] constexpr const char *pretty_function() noexcept {
+#if defined ENTT_PRETTY_FUNCTION
+    return static_cast<const char *>(ENTT_PRETTY_FUNCTION);
+#else
+    return "";
+#endif
+}
+
+template<typename Type>
 [[nodiscard]] constexpr auto stripped_type_name() noexcept {
 #if defined ENTT_PRETTY_FUNCTION
-    std::string_view pretty_function{static_cast<const char *>(ENTT_PRETTY_FUNCTION)};
-    auto first = pretty_function.find_first_not_of(' ', pretty_function.find_first_of(ENTT_PRETTY_FUNCTION_PREFIX) + 1);
-    auto value = pretty_function.substr(first, pretty_function.find_last_of(ENTT_PRETTY_FUNCTION_SUFFIX) - first);
+    const std::string_view full_name{pretty_function<Type>()};
+    auto first = full_name.find_first_not_of(' ', full_name.find_first_of(ENTT_PRETTY_FUNCTION_PREFIX) + 1);
+    auto value = full_name.substr(first, full_name.find_last_of(ENTT_PRETTY_FUNCTION_SUFFIX) - first);
     return value;
 #else
-    return std::string_view{""};
+    return std::string_view{};
 #endif
 }
 
@@ -138,9 +146,9 @@ struct type_info final {
     template<typename Type>
     // NOLINTBEGIN(modernize-use-transparent-functors)
     constexpr type_info(std::in_place_type_t<Type>) noexcept
-        : seq{type_index<std::remove_cv_t<std::remove_reference_t<Type>>>::value()},
-          identifier{type_hash<std::remove_cv_t<std::remove_reference_t<Type>>>::value()},
-          alias{type_name<std::remove_cv_t<std::remove_reference_t<Type>>>::value()} {}
+        : seq{type_index<std::remove_const_t<std::remove_reference_t<Type>>>::value()},
+          identifier{type_hash<std::remove_const_t<std::remove_reference_t<Type>>>::value()},
+          alias{type_name<std::remove_const_t<std::remove_reference_t<Type>>>::value()} {}
     // NOLINTEND(modernize-use-transparent-functors)
 
     /**
@@ -179,7 +187,7 @@ private:
  * @param rhs A type info object.
  * @return True if the two type info objects are identical, false otherwise.
  */
-[[nodiscard]] inline constexpr bool operator==(const type_info &lhs, const type_info &rhs) noexcept {
+[[nodiscard]] constexpr bool operator==(const type_info &lhs, const type_info &rhs) noexcept {
     return lhs.hash() == rhs.hash();
 }
 
@@ -189,7 +197,7 @@ private:
  * @param rhs A type info object.
  * @return True if the two type info objects differ, false otherwise.
  */
-[[nodiscard]] inline constexpr bool operator!=(const type_info &lhs, const type_info &rhs) noexcept {
+[[nodiscard]] constexpr bool operator!=(const type_info &lhs, const type_info &rhs) noexcept {
     return !(lhs == rhs);
 }
 
@@ -199,7 +207,7 @@ private:
  * @param rhs A valid type info object.
  * @return True if the first element is less than the second, false otherwise.
  */
-[[nodiscard]] inline constexpr bool operator<(const type_info &lhs, const type_info &rhs) noexcept {
+[[nodiscard]] constexpr bool operator<(const type_info &lhs, const type_info &rhs) noexcept {
     return lhs.index() < rhs.index();
 }
 
@@ -210,7 +218,7 @@ private:
  * @return True if the first element is less than or equal to the second, false
  * otherwise.
  */
-[[nodiscard]] inline constexpr bool operator<=(const type_info &lhs, const type_info &rhs) noexcept {
+[[nodiscard]] constexpr bool operator<=(const type_info &lhs, const type_info &rhs) noexcept {
     return !(rhs < lhs);
 }
 
@@ -221,7 +229,7 @@ private:
  * @return True if the first element is greater than the second, false
  * otherwise.
  */
-[[nodiscard]] inline constexpr bool operator>(const type_info &lhs, const type_info &rhs) noexcept {
+[[nodiscard]] constexpr bool operator>(const type_info &lhs, const type_info &rhs) noexcept {
     return rhs < lhs;
 }
 
@@ -232,7 +240,7 @@ private:
  * @return True if the first element is greater than or equal to the second,
  * false otherwise.
  */
-[[nodiscard]] inline constexpr bool operator>=(const type_info &lhs, const type_info &rhs) noexcept {
+[[nodiscard]] constexpr bool operator>=(const type_info &lhs, const type_info &rhs) noexcept {
     return !(lhs < rhs);
 }
 
@@ -249,18 +257,19 @@ private:
  */
 template<typename Type>
 [[nodiscard]] const type_info &type_id() noexcept {
-    if constexpr(std::is_same_v<Type, std::remove_cv_t<std::remove_reference_t<Type>>>) {
-        static type_info instance{std::in_place_type<Type>};
+    if constexpr(std::is_same_v<Type, std::remove_const_t<std::remove_reference_t<Type>>>) {
+        static const type_info instance{std::in_place_type<Type>};
         return instance;
     } else {
-        return type_id<std::remove_cv_t<std::remove_reference_t<Type>>>();
+        return type_id<std::remove_const_t<std::remove_reference_t<Type>>>();
     }
 }
 
 /*! @copydoc type_id */
 template<typename Type>
+// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 [[nodiscard]] const type_info &type_id(Type &&) noexcept {
-    return type_id<std::remove_cv_t<std::remove_reference_t<Type>>>();
+    return type_id<std::remove_const_t<std::remove_reference_t<Type>>>();
 }
 
 } // namespace entt

@@ -7,25 +7,20 @@
 
 namespace entt {
 
-/*! @cond TURN_OFF_DOXYGEN */
-namespace internal {
-
-template<typename>
-struct is_tuple_impl: std::false_type {};
-
-template<typename... Args>
-struct is_tuple_impl<std::tuple<Args...>>: std::true_type {};
-
-} // namespace internal
-/*! @endcond */
-
 /**
  * @brief Provides the member constant `value` to true if a given type is a
  * tuple, false otherwise.
  * @tparam Type The type to test.
  */
 template<typename Type>
-struct is_tuple: internal::is_tuple_impl<std::remove_cv_t<Type>> {};
+struct is_tuple: std::false_type {};
+
+/**
+ * @copybrief is_tuple
+ * @tparam Args Tuple template arguments.
+ */
+template<typename... Args>
+struct is_tuple<std::tuple<Args...>>: std::true_type {};
 
 /**
  * @brief Helper variable template.
@@ -88,7 +83,7 @@ struct forward_apply: private Func {
  * @tparam Func Type of underlying invocable object.
  */
 template<typename Func>
-forward_apply(Func) -> forward_apply<std::remove_reference_t<std::remove_cv_t<Func>>>;
+forward_apply(Func) -> forward_apply<std::remove_reference_t<std::remove_const_t<Func>>>;
 
 } // namespace entt
 

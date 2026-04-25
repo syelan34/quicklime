@@ -37,7 +37,7 @@ struct meta_range_iterator final {
     }
 
     constexpr meta_range_iterator operator++(int) noexcept {
-        meta_range_iterator orig = *this;
+        const meta_range_iterator orig = *this;
         return ++(*this), orig;
     }
 
@@ -46,7 +46,7 @@ struct meta_range_iterator final {
     }
 
     constexpr meta_range_iterator operator--(int) noexcept {
-        meta_range_iterator orig = *this;
+        const meta_range_iterator orig = *this;
         return operator--(), orig;
     }
 
@@ -70,7 +70,7 @@ struct meta_range_iterator final {
 
     [[nodiscard]] constexpr reference operator[](const difference_type value) const noexcept {
         if constexpr(std::is_same_v<It, typename decltype(meta_context::value)::const_iterator>) {
-            return {it[value].first, Type{*ctx, it[value].second}};
+            return {it[value].first, Type{*ctx, *it[value].second}};
         } else if constexpr(std::is_same_v<typename std::iterator_traits<It>::value_type, meta_base_node>) {
             return {it[value].type, Type{*ctx, it[value]}};
         } else {

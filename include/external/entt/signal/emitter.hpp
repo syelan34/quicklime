@@ -123,7 +123,7 @@ public:
      * @param value An instance of the given type of event.
      */
     template<typename Type>
-    void publish(Type &&value) {
+    void publish(Type value) {
         if(const auto id = type_id<Type>().hash(); handlers.first().contains(id)) {
             handlers.first()[id](&value);
         }
@@ -147,7 +147,7 @@ public:
      */
     template<typename Type>
     void erase() {
-        handlers.first().erase(type_hash<std::remove_cv_t<std::remove_reference_t<Type>>>::value());
+        handlers.first().erase(type_hash<std::remove_const_t<std::remove_reference_t<Type>>>::value());
     }
 
     /*! @brief Disconnects all the listeners. */
@@ -162,7 +162,7 @@ public:
      */
     template<typename Type>
     [[nodiscard]] bool contains() const {
-        return handlers.first().contains(type_hash<std::remove_cv_t<std::remove_reference_t<Type>>>::value());
+        return handlers.first().contains(type_hash<std::remove_const_t<std::remove_reference_t<Type>>>::value());
     }
 
     /**
