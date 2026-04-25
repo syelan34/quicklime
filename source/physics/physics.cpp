@@ -28,15 +28,14 @@ namespace {
         return sum / 256.f;
 	}
 	void handler(ERRF_ExceptionInfo *excep, CpuRegisters *regs) {
-	    ql::Console::error("Physics thread crashed");
-		ql::Console::error("Exception type: %d", excep->type);
-		ql::Console::error("PC: %p", regs->pc);
 	}
 } // namespace
+// 	    ql::Console::Error("Physics thread crashed");
+// 		ql::Console::Error("Exception type: %d", excep->type);
+// 		ql::Console::Error("PC: %p", regs->pc);
 
 void ql::physicsThread(void *) {
     threadOnException(handler, stack_top, &exception_data);
-	Console::log("Physics thread start");
 	// osTickCounterStart(&cnt);
 	while (!exitphys) {
 	    osTickCounterStart(&cnt);
@@ -55,32 +54,33 @@ void ql::physicsThread(void *) {
 		osTickCounterUpdate(&cnt);
 		float timemillis = osTickCounterRead(&cnt);
 		float avg = rollingavg(timemillis);
-		Console::log("exp:%3.0f s:%2.3f e:%f a:%f", timestep, timemillis, timemillis - timestep, avg, avg);
 		svcWaitSynchronization(timer, U64_MAX);
 	}
-	Console::log("Physics thread exit");
 }
+// 	Console::Log("Physics thread start");
+// 		Console::Log("exp:%3.0f s:%2.3f e:%f a:%f", timestep, timemillis, timemillis - timestep, avg, avg);
+// 	Console::Log("Physics thread exit");
 
 void ql::physicsInit(int tickspeed) {
-    Console::log("int ver.");
     timestep = (tickspeed-2119489.f)/965914.f; // calculated experimentally
-    Console::log("%f", timestep);
 	svcCreateTimer(&timer, RESET_PULSE);
 	svcSetTimer(timer, 0, tickspeed/10);
 	svcCreateEvent(&event, RESET_ONESHOT);
 	physthreadhandle = threadCreate(physicsThread, NULL, PHYSICS_THREAD_STACK_SZ, 0x18, -1, false);
 }
+//     Console::Log("int ver.");
+//     Console::Log("%f", timestep);
 
 void ql::physicsInit(float tickspeed) {
-    Console::log("float ver.");
     timestep = tickspeed;
 	svcCreateTimer(&timer, RESET_PULSE);
 	svcSetTimer(timer, 0, (96591*tickspeed+211948)); // calculated experimentally
 	svcCreateEvent(&event, RESET_ONESHOT);
 	physthreadhandle = threadCreate(physicsThread, NULL, PHYSICS_THREAD_STACK_SZ, 0x18, -1, false);
 }
+//     Console::Log("float ver.");
 
-void ql::physicsExit() { 
-    exitphys = true;
-    threadJoin(physthreadhandle, U64_MAX);
-}
+// void ql::physicsExit() { 
+//     exitphys = true;
+//     threadJoin(physthreadhandle, U64_MAX);
+// }

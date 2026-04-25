@@ -119,15 +119,15 @@ namespace ql::controls {
 		
 		sharedmemsize = round_up(0x30 + PACKET_BUFFER_SIZE + PACKET_BUFFER_SIZE, 0x1000);
         sharedmem = (u32*)memalign(sharedmemsize, 0x1000);
-        ql::Console::log("shared mem size %p addr %p", sharedmemsize, sharedmem);
+        ql::Console::Log("shared mem size %p addr %p", sharedmemsize, sharedmem);
 	    //res = iruserInit(sharedmem, sharedmemsize, PACKET_BUFFER_SIZE, PACKET_COUNT);
-		Console::log("init %u", res);
+		Console::Log("init %u", res);
 		ASSERT(res == 0, "Failed to initialize IR:USER, result %p", (void*)R_DESCRIPTION(res));
         //res = IRUSER_GetConnectionStatusEvent(&connectionstatusevent);
-        Console::log("connectionstatusevent %u", res);
+        Console::Log("connectionstatusevent %u", res);
         ASSERT(res == 0, "Failed to get connection status event");
         //res = IRUSER_GetReceiveEvent(&receivepacketevent);
-        Console::log("receiveevent %u", res);
+        Console::Log("receiveevent %u", res);
         ASSERT(res == 0, "Failed to get receive packet event");
 		
 		controlsThread = threadCreate(ctrlupdate, NULL, CONTROLS_THREAD_STACK_SZ, CONTROLS_THREAD_PRIORITY, CORE0, false);
@@ -150,7 +150,7 @@ namespace ql::controls {
     	//onsole::log("connection result %u", res);
         //if (R_FAILED(res)) return res;
         //res = iruserCPPRequestInputPolling(CPP_CONNECTION_POLLING_PERIOD_MS);
-        //Console::log("input polling %u", res);
+        //Console::Log("input polling %u", res);
         //if (R_FAILED(res)) return res;
         //res = svcWaitSynchronization(receivepacketevent, 100000); // wait for 100ms for a response
         //onsole::log("waiting %u", res);

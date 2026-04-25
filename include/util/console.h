@@ -62,9 +62,9 @@ namespace ql {
 		static void update();
 		static void init();
 
-		static void log(const char *text, ...);
-		static void warn(const char *text, ...);
-		static void error(const char *text, ...);
-		static void success(const char *text, ...);
+		static void Log(const char *text, ...);
+		static void Warn(const char *text, ...);
+		static void Error(const char *text, ...);
+		static void Success(const char *text, ...);
 	};
 } // namespace ql

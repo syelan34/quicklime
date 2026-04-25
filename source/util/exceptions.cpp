@@ -20,7 +20,7 @@ namespace ql {
 	// void print_func(void) {
 	//     auto trace = std::stacktrace::current();
  //        std::for_each(trace.rbegin(), trace.rend(), [](auto &entry) {
- //            Console::log("%s:%u %s", entry.source_file().c_str(), entry.source_line(), entry.description().c_str());
+ //            Console::Log("%s:%u %s", entry.source_file().c_str(), entry.source_line(), entry.description().c_str());
  //        });
  //    }
 	// extern "C" {

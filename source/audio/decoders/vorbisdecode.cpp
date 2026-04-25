@@ -29,11 +29,11 @@ void ql::vorbisdecode(void *data) {
 		error = true;
 
 	if (error) {
-		Console::error("Error loading vorbis audio");
+		Console::Error("Error loading vorbis audio");
 		return;
 	}
 
-	Console::log("Vorbis decoder created");
+	Console::Log("Vorbis decoder created");
 
 	const int SAMPLE_RATE		  = vi->rate;
 	const int SAMPLES_PER_BUF	  = SAMPLE_RATE * 200 / 1000; // 200ms buffer
@@ -52,7 +52,7 @@ void ql::vorbisdecode(void *data) {
 	const size_t bufferSize = WAVEBUF_SIZE * 3;
 	void *audioBuffer		= (int16_t *)linearAlloc(bufferSize);
 	if (!audioBuffer) {
-		Console::error("Failed to allocate audio buffer");
+		Console::Error("Failed to allocate audio buffer");
 		return;
 	}
 
@@ -111,5 +111,5 @@ exit:
 	linearFree(audioBuffer);
 	ov_clear(&vorbisfile);
 	fclose(f);
-	Console::log("Vorbis thread exited!");
+	Console::Log("Vorbis thread exited!");
 }

@@ -40,7 +40,7 @@ std::weak_ptr<ql::GameObject> ql::GameObject::find(std::string_view name) {
 			switch (name[1]) {
 			    case '.': // case ../obj -> get parent and search its children
 					if (!parent.expired()) return parent.lock()->find(name.substr(1));
-					else Console::warn("Object %s not found", name.data());
+					else Console::Warn("Object %s not found", name.data());
 					return {}; 
 			    case '/':
 					return find(name.substr(2));
@@ -72,5 +72,5 @@ ql::GameObject::~GameObject() {
 	if (id != entt::null)
 		s.reg.destroy(id);
 	Camera::cameraObjectListDirty = true;
-	Console::log("Children Size: ", children.size());
+	Console::Log("Children Size: ", children.size());
 }

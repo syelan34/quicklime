@@ -2,14 +2,15 @@
 #include <citro2d.h>
 #include <citro3d.h>
 #include "ql.h"
+#include "systems/rendering.h"
 
 namespace {
     void* stack_top = NULL;
     ERRF_ExceptionData exception_data = {};
     void handler(ERRF_ExceptionInfo *excep, CpuRegisters *regs) {
-        ql::Console::error("Main thread crashed");
-        ql::Console::error("Exception type: %d", excep->type);
-        ql::Console::error("PC: %p", regs->pc);
+        ql::Console::Error("Main thread crashed");
+        ql::Console::Error("Exception type: %d", excep->type);
+        ql::Console::Error("PC: %p", regs->pc);
     }
 	void prgrminit() {
 	    threadOnException(handler, stack_top, &exception_data);
@@ -34,10 +35,10 @@ namespace {
 		if (ql::SceneLoader::load(ql::Project::entrypointScene)) {
 			ql::SceneManager::init();
 		} else {
-			ql::Console::error("Failed to load scene: %s", ql::Project::entrypointScene);
 			// optionally exit or fallback
 			ql::Project::programShouldExitGraceful = true;
 		}
+           	ql::Console::Error("Failed to load scene: %s", ql::Project::entrypointScene);
 	}
 	void update() {
 		ql::SceneManager::update();

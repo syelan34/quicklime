@@ -127,10 +127,10 @@ namespace ql {
 #endif
 	}
 
-	void Console::log(const char *text, ...) { LOG(LOG_LEVEL_LOW, text); };
-	void Console::warn(const char *text, ...) { LOG(LOG_LEVEL_WARN, text); };
-	void Console::error(const char *text, ...) { LOG(LOG_LEVEL_ERROR, text); };
-	void Console::success(const char *text, ...) { LOG(LOG_LEVEL_SUCCESS, text); };
+	void Console::Log(const char *text, ...) { LOG(LOG_LEVEL_LOW, text); };
+	void Console::Warn(const char *text, ...) { LOG(LOG_LEVEL_WARN, text); };
+	void Console::Error(const char *text, ...) { LOG(LOG_LEVEL_ERROR, text); };
+	void Console::Success(const char *text, ...) { LOG(LOG_LEVEL_SUCCESS, text); };
 
 	void Console::update() {
 #if CONSOLE

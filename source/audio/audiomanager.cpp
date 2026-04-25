@@ -41,7 +41,7 @@ namespace ql {
 		for (ndsp_channel i = 0; i < NDSP_NUM_CHANNELS; i++) {
 			if (!channelInUse[i]) { // free channel
 				id = i;
-				Console::log("Free channel found");
+				Console::Log("Free channel found");
 				break;
 			}
 			if (channelPrio[i] <= lowestprio) {
@@ -79,7 +79,7 @@ namespace ql {
 		ASSERT(fn != nullptr, "Invalid audio file type");
 
 		audioThreads[id] = threadCreate(fn, &p, AUDIO_THREAD_STACK_SZ, AUDIO_THREAD_PRIORITY, CORE0, false);
-		Console::log("Playing using channel %d", id);
+		Console::Log("Playing using channel %d", id);
 		return id;
 	}
 

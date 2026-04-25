@@ -66,13 +66,13 @@ void ql::opusdecode(void *data) {
 	OggOpusFile *opusFile = op_open_file(file.c_str(), &error);
 
 	if (error) {
-		Console::error("Error %d while loading opus file", error);
+		Console::Error("Error %d while loading opus file", error);
 		return;
 	}
 	ndspWaveBuf s_waveBufs[3] = {};
 	int16_t *audioBuffer	  = (int16_t *)linearAlloc(0);
 	if (!audioBuffer) {
-		Console::error("Failed to allocate audio buffer");
+		Console::Error("Failed to allocate audio buffer");
 		return;
 	}
 
@@ -104,5 +104,5 @@ exit:
 	ndspChnReset(p.chn);
 	linearFree(audioBuffer);
 	op_free(opusFile);
-	Console::log("Opus thread exited!");
+	Console::Log("Opus thread exited!");
 }

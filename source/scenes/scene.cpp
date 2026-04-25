@@ -24,7 +24,7 @@ namespace ql {
 	}
 
 	Scene::~Scene() {
-		Console::log("Scene destructor");
+		Console::Log("Scene destructor");
 		scripts.clear();
 		root.reset();
 

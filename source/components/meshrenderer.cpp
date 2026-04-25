@@ -29,10 +29,10 @@ namespace ql {
 		meshrenderer_args &args = *(meshrenderer_args *)data;
 		std::string meshpath	= &args.data;
 		ASSERT(meshpath.size() > 0, "Model path is empty");
-		Console::log("Mesh path: %s", meshpath.c_str());
+		Console::Log("Mesh path: %s", meshpath.c_str());
 		std::string matpath = &args.data + meshpath.size() + 1;
 		ASSERT(matpath.size() > 0, "Material path is empty");
-		Console::log("Material path: %s", matpath.c_str());
+		Console::Log("Material path: %s", matpath.c_str());
 		mat = mdlLoader::parseMat(matpath);
 		std::optional<std::shared_ptr<mesh>> mesh_opt =
 			mdlLoader::parseModel(meshpath);

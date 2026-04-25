@@ -8,10 +8,10 @@ bool ql::ComponentManager::addComponent(const char *name, std::weak_ptr<GameObje
 									const void *data) {
 	LightLock_Guard l(_l);
 	if (getComponentMap().find(name) == getComponentMap().end()) {
-		Console::error("Unknown component %s", name);
-		Console::error("Known components:");
+		Console::Error("Unknown component %s", name);
+		Console::Error("Known components:");
 		for(const auto& elem : getComponentMap())
-			Console::log("%s: %p", elem.first.c_str(), elem.second);
+			Console::Log("%s: %p", elem.first.c_str(), elem.second);
 		return false;
 	}
 	getComponentMap()[name](obj, data);
@@ -21,7 +21,7 @@ bool ql::ComponentManager::addComponent(const char *name, std::weak_ptr<GameObje
 bool ql::ComponentManager::addScript(const char *name, std::weak_ptr<GameObject> obj) {
 	LightLock_Guard l(_l);
 	if (getScriptMap().find(name) == getScriptMap().end()) {
-		Console::error("Unknown script %s", name);
+		Console::Error("Unknown script %s", name);
 		return false;
 	}
 	getScriptMap()[name](obj);

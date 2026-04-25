@@ -41,7 +41,7 @@ namespace ql {
 	void sceneLoadThread(void *params) {
 
 		if (!params) {
-			Console::error("Params are null");
+			Console::Error("Params are null");
 			return;
 		}
 
@@ -64,7 +64,7 @@ namespace ql {
 		p.isdone   = true;
 
 
-		Console::success("finished loading scene file");
+		Console::Success("finished loading scene file");
 
 		if (!p.activate)
 			LightEvent_Wait(&p.event); // if the user doesn't want it activated
@@ -122,20 +122,20 @@ namespace ql {
 		if (textstr == nullptr) return false;
 		remove_whitespace(textstr);
 		std::string_view text{textstr.get()};
-		Console::success("read scene file");
+		Console::Success("read scene file");
 
 		// parse the whole object tree recursively
 		out->root = parseObject(out, text);
 		ASSERT(out->root, "No object tree in scene");
 		if (!out->root) return false;
-		Console::success("finished parsing scene file");
+		Console::Success("finished parsing scene file");
 
 		SceneManager::setScene(out);
 		return true;
 	}
 
 	void SceneLoader::printSceneTree(std::shared_ptr<GameObject> &root, int indentlevel) {
-		Console::log("%.*s%s", indentlevel * 2,
+		Console::Log("%.*s%s", indentlevel * 2,
 					 "| | | | | | | | | | | | | | | | | | | | | | | | | | | | ",
 					 root->name.c_str());
 		for (auto obj : root->children) {
@@ -226,7 +226,7 @@ namespace ql {
 
 		progress = 1 - (((float)input.size()) / size);
 		printf("\e[s\e[24;%uH%c\e[u", (int)size * 40, '-');
-		// Console::log("Progress %f", progress);
+		// Console::Log("Progress %f", progress);
 		return object;
 	}
 

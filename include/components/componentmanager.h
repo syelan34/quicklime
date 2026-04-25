@@ -34,7 +34,7 @@ namespace ql {
         template <typename T>
             requires validcomponent<T>
         static bool registerComponent(const std::string name) {
-            Console::log(name.c_str());
+            Console::Log(name.c_str());
         if constexpr (std::is_base_of_v<Script, T>)
             getScriptMap()[name] = ComponentManager::attachScript<T>;
         else
