@@ -3,6 +3,8 @@
 #include <citro3d.h>
 #include "ql.h"
 #include "systems/rendering.h"
+#include "systems/physics.h"
+#include "systems/scenes.h"
 
 namespace {
     void* stack_top = NULL;
@@ -22,20 +24,18 @@ namespace {
         ql::ComponentManager::init();
         ql::AudioManager::init();
         svcSetThreadPriority(CUR_THREAD_HANDLE, MAIN_THREAD_PRIORITY);
-        // ql::physicsInit(21887825); // 20ms tick speed (approximately)
-        // ql::physicsInit(54719563); // 50ms tick speed
-        // ql::physicsInit(20.f);
+        // ql::systems::Physics::Init(20.f); // 20ms interval (50hz)
         
-        if (ql::SceneLoader::load(ql::Project::entrypointScene)) {
-           	// ql::SceneManager::init();
-        } else {
+       	ql::systems::Scenes::Init();
+        
+        if (!ql::SceneLoader::load(ql::Project::entrypointScene)) {
            	ql::Console::Error("Failed to load scene: %s", ql::Project::entrypointScene);
            	// optionally exit or fallback
            	ql::Project::programShouldExitGraceful = true;
         }
 	}
 	void update() {
-		// ql::SceneManager::update();
+		ql::systems::Scenes::Update();
 		ql::Console::update();
 		ql::Time::Update();
 	}
@@ -44,9 +44,9 @@ namespace {
 		
 	}
 	void prgrmexit() {
-		// ql::physicsExit();
-		ql::controls::exit();
+		// ql::systems::Physics::Exit();
 		ql::systems::Graphics::Exit();
+		ql::controls::exit();
 		ndspExit();
 		romfsExit();
 	}

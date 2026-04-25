@@ -16,13 +16,6 @@ namespace ql {
 		std::vector<std::shared_ptr<Script>> scripts;
 		std::shared_ptr<GameObject> root;
 		entt::registry reg;
-		
-		// physics
-		// btBroadphaseInterface*                  _broadphase;
-	 //    btDefaultCollisionConfiguration*        _collisionConfiguration;
-	 //    btCollisionDispatcher*                  _dispatcher;
-	 //    btSequentialImpulseConstraintSolver*    _solver;
-	 //    btDiscreteDynamicsWorld*                _world;
 
 		friend class SceneLoader;
 		friend class Camera;

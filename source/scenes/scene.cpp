@@ -13,11 +13,6 @@
 namespace ql {
 	Scene::Scene(std::string name): 
 	    _name(name), 
-		// _broadphase(new btDbvtBroadphase()), 
-		// _collisionConfiguration(new btDefaultCollisionConfiguration()), 
-		// _dispatcher(new btCollisionDispatcher(_collisionConfiguration)), 
-		// _solver(new btSequentialImpulseConstraintSolver()), 
-		// _world(new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration)), 
 		name(_name) 
 	{
 		LightLock_Init(&lock);
@@ -27,13 +22,6 @@ namespace ql {
 		Console::Log("Scene destructor");
 		scripts.clear();
 		root.reset();
-
-		// // Deallocate Physics World
-		// delete _world;
-		// delete _solver;
-		// delete _collisionConfiguration;
-		// delete _broadphase;
-		// delete _dispatcher;
 	}
 
 	void Scene::awake() {
