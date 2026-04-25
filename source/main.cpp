@@ -14,13 +14,6 @@ namespace {
     }
 	void prgrminit() {
 	    threadOnException(handler, stack_top, &exception_data);
-		gfxInitDefault();
-		C3D_Init(C3D_DEFAULT_CMDBUF_SIZE * 64);
-		C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
-
-#if CONSOLE
-		consoleInit(GFX_BOTTOM, NULL);
-#endif
 		romfsInit();
 		osSetSpeedupEnable(true); // run way faster on n3ds
 		ql::Console::init();
@@ -38,6 +31,7 @@ namespace {
 			// optionally exit or fallback
 			ql::Project::programShouldExitGraceful = true;
 		}
+        ql::systems::Graphics::Init();
            	ql::Console::Error("Failed to load scene: %s", ql::Project::entrypointScene);
 	}
 	void update() {
@@ -47,15 +41,12 @@ namespace {
 	}
 
 	void draw() {
-		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-		ql::SceneManager::draw();
-		C3D_FrameEnd(GX_CMDLIST_FLUSH);
+		
 	}
 	void prgrmexit() {
 		// ql::physicsExit();
 		ql::controls::exit();
-		gfxExit();
-		C3D_Fini();
+		ql::systems::Graphics::Exit();
 		ndspExit();
 		romfsExit();
 	}

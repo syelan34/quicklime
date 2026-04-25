@@ -43,7 +43,6 @@ namespace ql {
 		void start();
 		void update();
 		void fixedUpdate();
-		void draw();
 
 		Scene(std::string name);
 	};
