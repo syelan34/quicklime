@@ -13,11 +13,11 @@
 namespace ql {
 	Scene::Scene(std::string name): 
 	    _name(name), 
-		_broadphase(new btDbvtBroadphase()), 
-		_collisionConfiguration(new btDefaultCollisionConfiguration()), 
-		_dispatcher(new btCollisionDispatcher(_collisionConfiguration)), 
-		_solver(new btSequentialImpulseConstraintSolver()), 
-		_world(new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration)), 
+		// _broadphase(new btDbvtBroadphase()), 
+		// _collisionConfiguration(new btDefaultCollisionConfiguration()), 
+		// _dispatcher(new btCollisionDispatcher(_collisionConfiguration)), 
+		// _solver(new btSequentialImpulseConstraintSolver()), 
+		// _world(new btDiscreteDynamicsWorld(_dispatcher, _broadphase, _solver, _collisionConfiguration)), 
 		name(_name) 
 	{
 		LightLock_Init(&lock);
@@ -28,12 +28,12 @@ namespace ql {
 		scripts.clear();
 		root.reset();
 
-		// Deallocate Physics World
-		delete _world;
-		delete _solver;
-		delete _collisionConfiguration;
-		delete _broadphase;
-		delete _dispatcher;
+		// // Deallocate Physics World
+		// delete _world;
+		// delete _solver;
+		// delete _collisionConfiguration;
+		// delete _broadphase;
+		// delete _dispatcher;
 	}
 
 	void Scene::awake() {
@@ -71,12 +71,5 @@ namespace ql {
 	void Scene::fixedUpdate() {
 		LightLock_Guard l(lock);
 		act_on_scripts(&Script::FixedUpdate);
-	};
-
-	void Scene::draw() {
-	    LightLock_Guard l(lock);
-		
-		C3D_FVUnifSet(GPU_VERTEX_SHADER, shared_unifs::time_loc, Time::curTime, std::sin(Time::curTime), std::cos(Time::curTime), Time::deltaTime);
-		reg.view<Camera>().each([](auto &cam) { cam.Render(); });
 	};
 } // namespace ql

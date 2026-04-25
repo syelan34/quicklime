@@ -4,7 +4,7 @@
 #include <citro3d.h>
 #include <external/entt/entt.hpp>
 #include <string>
-#include <bullet/btBulletDynamicsCommon.h>
+// #include <bullet/btBulletDynamicsCommon.h>
 
 namespace ql {
     class Script;
@@ -17,11 +17,11 @@ namespace ql {
 		entt::registry reg;
 		
 		// physics
-		btBroadphaseInterface*                  _broadphase;
-	    btDefaultCollisionConfiguration*        _collisionConfiguration;
-	    btCollisionDispatcher*                  _dispatcher;
-	    btSequentialImpulseConstraintSolver*    _solver;
-	    btDiscreteDynamicsWorld*                _world;
+		// btBroadphaseInterface*                  _broadphase;
+	 //    btDefaultCollisionConfiguration*        _collisionConfiguration;
+	 //    btCollisionDispatcher*                  _dispatcher;
+	 //    btSequentialImpulseConstraintSolver*    _solver;
+	 //    btDiscreteDynamicsWorld*                _world;
 
 		friend class SceneLoader;
 		friend class Camera;
