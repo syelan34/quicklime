@@ -1,3 +1,5 @@
+#pragma once
+
 #include "scene.h"
 #include <3ds.h>
 #include <citro2d.h>

@@ -1,22 +1,22 @@
-#include "scenemanager.h"
+#include "systems/scenes.h"
 // #include "camera.h"
 #include "console.h"
 #include "threads.h"
 #include <memory>
 
-namespace ql {
-	bool SceneManager::loadSceneNextFrame = false;
-	std::unique_ptr<Scene> SceneManager::currentScene,
-		SceneManager::sceneToBeLoaded;
-	LightLock SceneManager::lock;
+namespace ql::systems {
+	bool Scenes::loadSceneNextFrame = false;
+	std::unique_ptr<Scene> Scenes::currentScene,
+		Scenes::sceneToBeLoaded;
+	LightLock Scenes::lock;
 
-	void SceneManager::init() {
+	void Scenes::Init() {
 		// disallows setting a new scene while also updating what the new scene
 		// will be
 		LightLock_Init(&lock);
 	}
 
-	void SceneManager::setScene(std::unique_ptr<Scene> &s) {
+	void Scenes::setScene(std::unique_ptr<Scene> &s) {
 		if (!s)
 			return; // make sure it is a real scene (non null)
 
@@ -25,7 +25,7 @@ namespace ql {
 		loadSceneNextFrame = true;
 	}
 
-	void SceneManager::setScene(std::unique_ptr<Scene> &&s) {
+	void Scenes::setScene(std::unique_ptr<Scene> &&s) {
 		if (!s)
 			return; // make sure it is a real scene (non null)
 
@@ -35,7 +35,7 @@ namespace ql {
 	}
 
 	// must only be called from main thread
-	void SceneManager::update() {
+	void Scenes::Update() {
 		LightLock_Guard l(lock);
 		if (currentScene)
 			currentScene->update();
@@ -59,17 +59,10 @@ namespace ql {
 
 		// start the scene objects
 		Console::Log("Try wake up");
-		SceneManager::currentScene->awake();
+		currentScene->awake();
 		Console::Success("Scene woke up");
 		Console::Log("Scene starting");
-		SceneManager::currentScene->start();
+		currentScene->start();
 		Console::Success("Scene started");
-	}
-
-	void SceneManager::draw() {
-		LightLock_Guard l(lock);
-		if (!currentScene)
-			return;
-		currentScene->draw();
 	}
 } // namespace ql

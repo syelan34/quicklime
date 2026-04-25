@@ -19,7 +19,7 @@ include $(DEVKITARM)/3ds_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	$(shell basename $(CURDIR))
 BUILD		:=	build
-SOURCES		:=  source source/components source/scenes source/audio source/util source/shaders source/physics source/audio/decoders
+SOURCES		:=  source source/components source/scenes source/audio source/util source/shaders source/physics source/audio/decoders source/systems
 DATA		:=	data
 INCLUDES	:=	include include/components include/audio include/scenes include/util include/shaders include/physics entt/single_include
 

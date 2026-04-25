@@ -4,7 +4,8 @@
 #include <citro3d.h>
 #include <external/entt/entt.hpp>
 #include <string>
-// #include <bullet/btBulletDynamicsCommon.h>
+
+namespace ql::systems {class Scenes;};
 
 namespace ql {
     class Script;
@@ -30,19 +31,20 @@ namespace ql {
 		friend class GameObject;
 		friend class Script;
 		friend class ComponentManager;
+		friend class systems::Scenes;
 		friend void physicsThread(void *);
 		friend void sceneLoadThread(void *params);
 
 		void act_on_scripts(void (Script::*action)());
-
-	  public:
-		const std::string &name = _name;
-		~Scene();
-
+		
 		void awake();
 		void start();
 		void update();
 		void fixedUpdate();
+
+	  public:
+		const std::string &name = _name;
+		~Scene();
 
 		Scene(std::string name);
 	};
