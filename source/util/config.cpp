@@ -1,5 +1,4 @@
 #include "config.h"
-#include "3ds/services/cfgu.h"
 #include <3ds.h>
 
 CFG_Language ql::config::lang		 = CFG_LANGUAGE_JP;
