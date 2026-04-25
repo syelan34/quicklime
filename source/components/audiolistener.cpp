@@ -3,8 +3,7 @@
 #include "gameobject.h"
 
 namespace ql {
-	Listener::Listener(std::weak_ptr<GameObject> owner, const void *data)
-		: parent(owner), active(true) {
+	Listener::Listener(const void *data): active(true) {
 		(void)data;
 	}
 	void Listener::update() {

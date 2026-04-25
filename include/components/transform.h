@@ -22,7 +22,7 @@ namespace ql {
 		Transform(); // sets position, rotation, and scale to do nothing
 
 		// constructor to be used when data created by componentmanager
-		Transform(std::weak_ptr<GameObject> parent, const void *data);
+		Transform(const void *data);
 
 		Transform(C3D_FVec position	 = {{1, 0, 0, 0}},
 				  C3D_FQuat rotation = {{1, 0, 0, 0}},

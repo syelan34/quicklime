@@ -2,9 +2,8 @@
 #include "lights.h"
 #include "componentmanager.h"
 #include "ql_assert.h"
-#include "transform.h"
 #include <climits>
-#include "shared_unif_locations.h"
+// #include "shared_unif_locations.h"
 
 // LightLock Light::lock = LightLock();
 namespace ql {
@@ -25,7 +24,7 @@ namespace ql {
         //     return 1.0f / (1.0f + linear * d + quadratic * d * d);
         // }
     }
-    Light::Light(std::weak_ptr<GameObject> owner, const void *data) : p(owner) {
+    Light::Light(const void *data) {
         ASSERT(data != nullptr, "Invalid light constructor arg");
         
         light_args &args = *(light_args *)data;
@@ -36,8 +35,6 @@ namespace ql {
         //TODO set light luts etc
     }
 	Light &Light::operator=(ql::Light &&l) {
-		p	= l.p;
-		l.p = {};
 		id = l.id;
 		l.id = UINT_MAX;
 		return *this;
@@ -48,18 +45,14 @@ namespace ql {
 	}
 
 	void Light::setSelf(C3D_Mtx &view) {
-	    ASSERT(!p.expired(), "Parent expired");
-	    C3D_Mtx model = *p.lock()->getComponent<Transform>();
-		C3D_Mtx modelView;
-		Mtx_Multiply(&modelView, &model, &view);
 		
-		C3D_FVec transformedPosition = Mtx_MultiplyFVec4(&modelView, position);
-		C3D_LightPosition(&lights::lights[id], &transformedPosition); // fine because it makes a copy
-		C3D_LightColor(&lights::lights[id], color.x, color.y, color.z);
+		// C3D_FVec transformedPosition = Mtx_MultiplyFVec4(&modelView, position);
+		// C3D_LightPosition(&lights::lights[id], &transformedPosition); // fine because it makes a copy
+		// C3D_LightColor(&lights::lights[id], color.x, color.y, color.z);
 		
-		if (id > 4) return;
-		C3D_FVUnifSet(GPU_VERTEX_SHADER, shared_unifs::lightcolor_loc + id, color.x, color.y, color.z, 1.0f);
-	    C3D_FVUnifSet(GPU_VERTEX_SHADER, shared_unifs::lightposition_loc + id, transformedPosition.x, transformedPosition.y, transformedPosition.z, 1.0f);
+		// if (id > 4) return;
+		// C3D_FVUnifSet(GPU_VERTEX_SHADER, shared_unifs::lightcolor_loc + id, color.x, color.y, color.z, 1.0f);
+	 //    C3D_FVUnifSet(GPU_VERTEX_SHADER, shared_unifs::lightposition_loc + id, transformedPosition.x, transformedPosition.y, transformedPosition.z, 1.0f);
 		
 		// std::visit([&](auto &light) { light.set(modelView); }, internal_light);
 	}

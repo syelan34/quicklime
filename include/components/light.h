@@ -19,7 +19,6 @@ namespace ql {
 
 	class Light {
 	    friend class Camera;
-		std::weak_ptr<GameObject> p;
 		// std::variant<DummyLight, PointLight, DirectionalLight> internal_light;
 		// LightType t;
 		
@@ -43,7 +42,7 @@ namespace ql {
 		void setSelf(C3D_Mtx &modelView);
 
 	  public:
-		Light(std::weak_ptr<GameObject> owner, const void *data);
+		Light(const void *data);
 		Light &operator=(Light &&);
 		~Light();
 		void setPosition(C3D_FVec& position);

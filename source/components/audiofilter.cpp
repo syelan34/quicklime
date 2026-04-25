@@ -24,21 +24,13 @@ namespace ql {
         };
     }
 
-	AudioFilter::AudioFilter(std::weak_ptr<GameObject> obj, const void *data) {
+	AudioFilter::AudioFilter(const void *data) {
 	    (void)data;
-        p = obj;
         t = FILTER_LOWPASS;
-        onListener = false;
-        ASSERT(!p.expired(), "Parent expired");
-        if (p.lock()->getComponent<Listener>() != nullptr)
-            onListener = true;
 	}
 
 	// apply filter
 	void AudioFilter::apply(ndsp_channel channel) {
-	    ASSERT(!p.expired(), "Parent expired");
-	    if (p.lock()->getComponent<Listener>() != nullptr)
-            onListener = true;
 		switch (channel) {
 		case -1: // all channels
 		    for (int i = 0; i < NDSP_NUM_CHANNELS; i++) applyFilter(t, i, onListener);

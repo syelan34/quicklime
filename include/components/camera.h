@@ -17,7 +17,6 @@ namespace ql {
 		friend class GameObject;
 	  private:
 		static bool cameraObjectListDirty;
-		std::weak_ptr<GameObject> parent;
 		gfxScreen_t display;
 		// std::vector<std::pair<Renderer *, Transform *>> culledBuckets[3];
 		C3D_Mtx cameraMatrix[2];
@@ -27,8 +26,8 @@ namespace ql {
 		float nearClip, farClip, focalLength = 2.f, fovY, height, width, aspectRatio;
 		bool stereoEnabled, orthographic, highRes, active;
 		uint32_t backgroundColour, cullingMask;
-		Camera(std::weak_ptr<GameObject> parent, const void *args);
 		iod_func iodMapFunc = [](float iod) { return iod * 0.2f; }; // default iod map function
+		Camera(const void *args);
 		~Camera();
 	};
 } // namespace ql

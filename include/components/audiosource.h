@@ -36,7 +36,6 @@ class AudioSource {
 	friend class Scene;		   // allow scene to call update
 	friend class AudioManager; // allow audio manager to access/modify info
 	void update();
-	std::weak_ptr<GameObject> parent;
 	ndsp_channel voiceID = -1; // 0 to 24
 	channel_prio priority;
 	AudioRolloff rolloffMode;
@@ -47,7 +46,7 @@ class AudioSource {
 	  public:
 		bool paused, mute;
 		float volume, stereoPan;
-		AudioSource(std::weak_ptr<GameObject> obj, const void *params);
+		AudioSource(const void *params);
 		void Play();
 		void Play(const char *clip);
 		void Stop();

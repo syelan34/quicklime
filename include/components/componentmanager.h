@@ -13,8 +13,8 @@
 
 namespace ql {
 	template <typename T>
-	concept validcomponent = requires(std::weak_ptr<GameObject> obj, const void *data) {
-								 T(obj, data);
+	concept validcomponent = requires(const void *data) {
+								 T(data);
 							 } || std::is_base_of_v<Script, T>;
 
 	class ComponentManager {
@@ -27,7 +27,7 @@ namespace ql {
 		template <typename T>
 		static void attachComponent(std::weak_ptr<GameObject> obj, const void *data) {
 		    if (obj.expired()) return;
-		    obj.lock()->addComponent<T>(obj, data);
+		    obj.lock()->addComponent<T>(data);
 		}
 
 	  public:

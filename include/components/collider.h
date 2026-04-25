@@ -27,11 +27,10 @@ namespace ql {
 	class Collider {
 		ColliderType t;
 		u32 layer = 1; // by default on base layer (layer 1)
-		GameObject *parent;
 		btCollisionObject col;
 
 	  public:
-		Collider(GameObject &obj, const void *data);
+		Collider(const void *data);
 		Collider& operator=(Collider&&);
 	};
 } // namespace ql
