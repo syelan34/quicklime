@@ -50,20 +50,20 @@ namespace ql {
 
 		// first delete old scene
 		if (currentScene)
-		    Console::log("Scene '%s' try reset", currentScene->name.c_str());
+		    Console::Log("Scene '%s' try reset", currentScene->name.c_str());
 		currentScene.reset();
-		Console::success("Scene reset");
+		Console::Success("Scene reset");
 
 		// then swap in new scene
 		currentScene = std::move(sceneToBeLoaded);
 
 		// start the scene objects
-		Console::log("Try wake up");
+		Console::Log("Try wake up");
 		SceneManager::currentScene->awake();
-		Console::success("Scene woke up");
-		Console::log("Scene starting");
+		Console::Success("Scene woke up");
+		Console::Log("Scene starting");
 		SceneManager::currentScene->start();
-		Console::success("Scene started");
+		Console::Success("Scene started");
 	}
 
 	void SceneManager::draw() {

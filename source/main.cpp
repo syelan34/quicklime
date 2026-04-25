@@ -35,7 +35,7 @@ namespace {
            	ql::Console::Error("Failed to load scene: %s", ql::Project::entrypointScene);
 	}
 	void update() {
-		ql::SceneManager::update();
+		// ql::SceneManager::update();
 		ql::Console::update();
 		ql::Time::Update();
 	}

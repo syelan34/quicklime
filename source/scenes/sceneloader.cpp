@@ -7,7 +7,7 @@
 #include "ql_assert.h"
 #include "readfile.h"
 #include "scene.h"
-#include "scenemanager.h"
+#include "systems/scenes.h"
 #include "slmdlloader.h"
 #include <3ds.h>
 #include <cctype>
@@ -70,7 +70,7 @@ namespace ql {
 			LightEvent_Wait(&p.event); // if the user doesn't want it activated
 									   // immediately, wait for their signal
 
-		SceneManager::setScene(p.s);
+		ql::systems::Scenes::setScene(p.s);
 
 		delete (sceneLoadThreadParams *)params; // clean up the pointer
 	}
@@ -130,7 +130,7 @@ namespace ql {
 		if (!out->root) return false;
 		Console::Success("finished parsing scene file");
 
-		SceneManager::setScene(out);
+		ql::systems::Scenes::setScene(out);
 		return true;
 	}
 

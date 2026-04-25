@@ -1,9 +1,10 @@
 #include "console.h"
 #include "controls.h"
 #include "defines.h"
-#include "scenemanager.h"
+// #include "scenemanager.h"
 #include "ql_time.h"
 #include "stats.h"
+#include "systems/scenes.h"
 #include "util/threads.h"
 #include <stdio.h>
 #include <malloc.h>
@@ -148,7 +149,7 @@ namespace ql {
 			printf("\e[s\e[%u;%uHDraw Calls: %u\e[u", DRAW_Y, DRAW_X,
 				   stats::_drawcalls);
 			printf("\e[s\e[%u;%uHCurrent Scene: %s            \e[u", SCN_Y,
-				   SCN_X, SceneManager::currentScene->name.c_str());
+				   SCN_X, ql::systems::Scenes::currentScene->name.c_str());
 			printf("\e[s\e[%u;%uHHeap Usage: %u KiB         \e[u", MEM_Y, MEM_X,
 				   mallinfo().uordblks / 1024);
 			printf("\e[s\e[%u;%uHLinear RAM Free: %lu KiB         \e[u",

@@ -3,7 +3,7 @@
 #include "console.h"
 #include "decoders.h"
 #include "defines.h"
-#include "scenemanager.h"
+#include "systems/scenes.h"
 #include "ql_assert.h"
 #include "threads.h"
 #include <3ds.h>
@@ -57,7 +57,7 @@ namespace ql {
 			return -1;
 		
 		// force disable the running channel
-		SceneManager::currentScene->reg.view<AudioSource>().each([&](auto &a) {
+		ql::systems::Scenes::currentScene->reg.view<AudioSource>().each([&](auto &a) {
 			if (a.voiceID == id)
 				a.Stop();
 		});
