@@ -9,17 +9,6 @@ ql::GameObject::GameObject(std::string name, Scene &s)
 	Camera::cameraObjectListDirty = true;
 }
 
-ql::GameObject::GameObject(GameObject &other): s(other.s), children(other.children), id(other.id), name(other.name) {}
-
-ql::GameObject::GameObject(GameObject &&other)
-	: s(other.s), children(std::move(other.children)), 
-	  parent(other.parent),
-	  id(other.id), name(other.name) {
-	other.parent = {};
-	other.id	 = entt::entity{entt::null};
-	other.children.clear();
-}
-
 
 
 std::weak_ptr<ql::GameObject> ql::GameObject::r_search(std::string name) {
@@ -34,37 +23,72 @@ std::weak_ptr<ql::GameObject> ql::GameObject::r_search(std::string name) {
 	return out;
 }
 
-std::weak_ptr<ql::GameObject> ql::GameObject::find(std::string_view name) {
-	switch (name[0]) {
-	    case '.':
-			switch (name[1]) {
-			    case '.': // case ../obj -> get parent and search its children
-					if (!parent.expired()) return parent.lock()->find(name.substr(1));
-					else Console::Warn("Object %s not found", name.data());
-					return {}; 
-			    case '/':
-					return find(name.substr(2));
-			}
-			break;
-		case '/': {
-            // get root and start from there
-            auto root = std::weak_ptr(s.root);
-            return root.lock()->find(name.substr(1));
-		}
-		default: // obj/obj2 is the same as ./obj/obj2
-		    size_t slashpos = name.find_first_of('/');
-		    auto subname = name.substr(0, slashpos);
-            for (auto& obj : this->children) 
-                if (obj->name == subname) return obj->find(name.substr(slashpos+1));
-	}
-	return {};
-};
+std::weak_ptr<ql::GameObject> ql::GameObject::find(std::string_view path) {
+    if (path.empty())
+        return {};
+
+    if (path.starts_with("./"))
+        return find(path.substr(2));
+
+    if (path.starts_with("../")) {
+        auto p = parent.lock();
+        if (!p) {
+            Console::Warn("Object %s not found", path.data());
+            return {};
+        }
+        return p->find(path.substr(3));
+    }
+
+    if (path.front() == '/') {
+        auto root = s.root;
+        if (!root)
+            return {};
+        if (path.size() == 1)
+            return root;
+        return root->find(path.substr(1));
+    }
+
+    const auto slashpos = path.find('/');
+    const auto segment = path.substr(0, slashpos);
+
+    for (const auto &child : children) {
+        if (!child || child->name != segment)
+            continue;
+
+        if (slashpos == std::string_view::npos)
+            return child;
+
+        return child->find(path.substr(slashpos + 1));
+    }
+
+    return {};
+}
 
 void ql::GameObject::assignChild(std::shared_ptr<GameObject> &object) {
+    if (!object || object.get() == this || !object->parent.expired())
+        return;
+
+    for (auto ancestor = parent.lock(); ancestor;
+         ancestor = ancestor->parent.lock()) {
+        if (ancestor.get() == object.get())
+            return;
+    }
+
+    object->parent = weak_from_this();
     children.push_back(std::move(object));
 }
 
 void ql::GameObject::assignChild(std::shared_ptr<GameObject> &&object) {
+    if (!object || object.get() == this || !object->parent.expired())
+        return;
+
+    for (auto ancestor = parent.lock(); ancestor;
+         ancestor = ancestor->parent.lock()) {
+        if (ancestor.get() == object.get())
+            return;
+    }
+
+    object->parent = weak_from_this();
     children.push_back(std::move(object));
 }
 

@@ -31,9 +31,12 @@ namespace ql {
 											// do it when this is called)
 	}
 	
-	void Scene::act_on_scripts(void (Script::*action)()) {
-		for (auto &s : scripts)
-			((*s).*action)();
+	void Scene::act_on_scripts(void (Script::*action)(), bool onlyEnabled) {
+		for (auto &script : scripts) {
+			if (!script || (onlyEnabled && !script->enabled))
+				continue;
+			((*script).*action)();
+		}
 	}
 
 	void Scene::start() {
@@ -44,7 +47,7 @@ namespace ql {
 
 	void Scene::update() {
 		LightLock_Guard l(lock);
-		act_on_scripts(&Script::Update); 
+		act_on_scripts(&Script::Update, true);
 		// call update() on every gameobject
 
 		// whatever other per frame logic stuff will get called here
@@ -53,11 +56,11 @@ namespace ql {
 		// call lateupdate() on every gameobject (propagates from root).
 		// Used to ensure stuff like cameras move only when everything else is
 		// done moving
-		act_on_scripts(&Script::LateUpdate);
+		act_on_scripts(&Script::LateUpdate, true);
 	};
 
 	void Scene::fixedUpdate() {
 		LightLock_Guard l(lock);
-		act_on_scripts(&Script::FixedUpdate);
+		act_on_scripts(&Script::FixedUpdate, true);
 	};
 } // namespace ql

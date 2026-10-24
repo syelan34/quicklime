@@ -39,7 +39,9 @@ void ql::systems::Graphics::Init() {
     C3D_RenderTargetSetOutput(target[3], GFX_BOTTOM, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
 }
 
-void ql::systems::Graphics::DrawScene(std::unique_ptr<Scene>) {
+void ql::systems::Graphics::DrawScene(Scene *scene) {
+	if (!scene)
+		return;
     C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
     // set time uniform
     C3D_FVUnifSet(GPU_VERTEX_SHADER, shared_unifs::time_loc, Time::curTime, sinf(Time::curTime), cosf(Time::curTime), Time::deltaTime);

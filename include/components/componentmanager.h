@@ -20,15 +20,25 @@ namespace ql {
 	class ComponentManager {
 		static LightLock _l;
 		ComponentManager() {}
-		template <typename T> static void attachScript(std::weak_ptr<GameObject> owner) {
-		    if (owner.expired()) return;
-			owner.lock()->s.scripts.push_back(std::make_shared<T>(owner));
+				template <typename T>
+		static void attachScript(std::weak_ptr<GameObject> owner) {
+			auto obj = owner.lock();
+			if (!obj)
+				return;
+
+			obj->s.scripts.push_back(std::make_shared<T>(obj));
 		}
+
 		template <typename T>
 		static void attachComponent(std::weak_ptr<GameObject> obj, const void *data) {
-		    if (obj.expired()) return;
-		    obj.lock()->addComponent<T>(data);
+			auto gameObject = obj.lock();
+			if (!gameObject)
+				return;
+
+			gameObject->addComponent<T>(data);
 		}
+
+
 
 	  public:
         template <typename T>

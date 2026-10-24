@@ -1,4 +1,5 @@
 #include "systems/scenes.h"
+#include "systems/rendering.h"
 // #include "camera.h"
 #include "console.h"
 #include "threads.h"
@@ -65,4 +66,9 @@ namespace ql::systems {
 		currentScene->start();
 		Console::Success("Scene started");
 	}
+	void Scenes::Draw() {
+		if (currentScene)
+			Graphics::DrawScene(currentScene.get());
+	}
+
 } // namespace ql

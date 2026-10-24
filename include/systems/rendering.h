@@ -12,6 +12,6 @@ namespace ql::systems {
         public:
         static void Init();
         static void Exit();
-        static void DrawScene(std::unique_ptr<Scene>);
+        static void DrawScene(Scene *scene);
     };
 }

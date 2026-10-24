@@ -28,7 +28,7 @@ namespace ql {
 		friend void physicsThread(void *);
 		friend void sceneLoadThread(void *params);
 
-		void act_on_scripts(void (Script::*action)());
+		void act_on_scripts(void (Script::*action)(), bool onlyEnabled = false);
 		
 		void awake();
 		void start();

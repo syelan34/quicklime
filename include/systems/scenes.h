@@ -30,6 +30,7 @@ namespace ql::systems {
 	  public:
 		static void Init();
 		static void Update();
+		static void Draw();
 		static void Exit();
 	};
 } // namespace ql

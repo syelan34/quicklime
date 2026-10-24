@@ -41,7 +41,7 @@ namespace {
 	}
 
 	void draw() {
-		
+		ql::systems::Scenes::Draw();
 	}
 	void prgrmexit() {
 		// ql::systems::Physics::Exit();

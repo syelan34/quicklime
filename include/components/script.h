@@ -8,13 +8,17 @@ namespace ql {
 	class Script {
 	  protected:
 		std::weak_ptr<GameObject> owner;
-		template <class T> inline T *GetComponent() {
-		    if (owner.expired()) return nullptr;
-			return owner.lock()->s.reg.try_get<T>(owner.lock()->id);
+
+		template <class T>
+		inline T *GetComponent() {
+			auto obj = owner.lock();
+			if (!obj)
+				return nullptr;
+
+			return obj->s.reg.try_get<T>(obj->id);
 		}
 
-		std::weak_ptr<GameObject> find(std::string object);
-
+				std::weak_ptr<GameObject> find(std::string object);
 	  public:
 		bool enabled = true;
 		Script(std::weak_ptr<GameObject> owner);
